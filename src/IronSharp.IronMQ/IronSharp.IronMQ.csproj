@@ -48,7 +48,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Client.cs" />
-    <Compile Include="DefaultHosts.cs" />
+    <Compile Include="CloudHosts.cs" />
     <Compile Include="MessageCollection.cs" />
     <Compile Include="MessageIdCollection.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -58,6 +58,7 @@
     <Compile Include="QueueInfo.cs" />
     <Compile Include="QueueMessage.cs" />
     <Compile Include="Subscriber.cs" />
+    <Compile Include="SubscriberCollection.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\IronSharp.Core\IronSharp.Core.csproj">

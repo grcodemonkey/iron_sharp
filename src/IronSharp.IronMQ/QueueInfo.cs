@@ -6,10 +6,9 @@ using Newtonsoft.Json;
 
 namespace IronSharp.IronMQ
 {
-    public class QueueInfo
+    public class QueueInfo : IInspectable
     {
-        [JsonProperty("subscribers", DefaultValueHandling = DefaultValueHandling.Ignore)]
-        private List<Subscriber> _subscribers;
+        [JsonProperty("subscribers", DefaultValueHandling = DefaultValueHandling.Ignore)] private List<Subscriber> _subscribers;
 
         [JsonProperty("id", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public string Id { get; set; }
@@ -46,13 +45,6 @@ namespace IronSharp.IronMQ
         [JsonProperty("size", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public int? Size { get; set; }
 
-        [JsonIgnore]
-        public List<Subscriber> Subscribers
-        {
-            get { return LazyInitializer.EnsureInitialized(ref _subscribers); }
-            set { _subscribers = value; }
-        }
-
         [JsonProperty("total_messages", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public int? TotalMessages { get; set; }
 
@@ -74,6 +66,13 @@ namespace IronSharp.IronMQ
                 }
             }
             set { PushType = value.As<PushType>(); }
+        }
+
+        [JsonIgnore]
+        public List<Subscriber> Subscribers
+        {
+            get { return LazyInitializer.EnsureInitialized(ref _subscribers); }
+            set { _subscribers = value; }
         }
     }
 }

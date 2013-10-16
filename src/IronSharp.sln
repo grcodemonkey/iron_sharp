@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IronSharp.Core", "IronSharp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IronSharp.IronMQ", "IronSharp.IronMQ\IronSharp.IronMQ.csproj", "{D891A220-AA6F-4D0C-B012-B25875787BA0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IronSharp.IronWorker", "IronSharp.IronWorker\IronSharp.IronWorker.csproj", "{4FA5BF5D-C543-404E-89EC-C3BFF90ACF6B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{D891A220-AA6F-4D0C-B012-B25875787BA0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D891A220-AA6F-4D0C-B012-B25875787BA0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D891A220-AA6F-4D0C-B012-B25875787BA0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4FA5BF5D-C543-404E-89EC-C3BFF90ACF6B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4FA5BF5D-C543-404E-89EC-C3BFF90ACF6B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4FA5BF5D-C543-404E-89EC-C3BFF90ACF6B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4FA5BF5D-C543-404E-89EC-C3BFF90ACF6B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

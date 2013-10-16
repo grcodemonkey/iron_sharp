@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{1A6CC922-40A5-440A-868D-757FCDB08622}</ProjectGuid>
+    <ProjectGuid>{4FA5BF5D-C543-404E-89EC-C3BFF90ACF6B}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>IronSharp.Core</RootNamespace>
-    <AssemblyName>IronSharp.Core</AssemblyName>
+    <RootNamespace>IronSharp.IronWorker</RootNamespace>
+    <AssemblyName>IronSharp.IronWorker</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -36,11 +36,6 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Net.Http" />
-    <Reference Include="System.Net.Http.Formatting, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.AspNet.WebApi.Client.4.0.30506.0\lib\net40\System.Net.Http.Formatting.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Net.Http.WebRequest" />
-    <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -48,31 +43,45 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DateTimeHelpers.cs" />
-    <Compile Include="ExponentialBackoff.cs" />
-    <Compile Include="ExtensionsForDictionary.cs" />
-    <Compile Include="ExtensionsForIInspectable.cs" />
-    <Compile Include="ExtensionsForString.cs" />
-    <Compile Include="IInspectable.cs" />
-    <Compile Include="IMsg.cs" />
-    <Compile Include="IPagingFilter.cs" />
-    <Compile Include="IRestClientRequest.cs" />
-    <Compile Include="IronClientConfig.cs" />
-    <Compile Include="IronSharpException.cs" />
-    <Compile Include="JsonContent.cs" />
-    <Compile Include="JSON.cs" />
-    <Compile Include="MaximumRetryAttemptsExceededException.cs" />
-    <Compile Include="PagingFilter.cs" />
+    <Compile Include="Client.cs" />
+    <Compile Include="CloudHosts.cs" />
+    <Compile Include="Code\CodeInfoCollection.cs" />
+    <Compile Include="Code\CodeClient.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="HttpClientOptions.cs" />
-    <Compile Include="ResponseMsg.cs" />
-    <Compile Include="RestClient.cs" />
-    <Compile Include="RestClientRequest.cs" />
-    <Compile Include="RestResponse.cs" />
+    <Compile Include="Code\CodeInfo.cs" />
+    <Compile Include="Code\RevisionCollection.cs" />
+    <Compile Include="Schedules\ScheduleClient.cs" />
+    <Compile Include="Schedules\ScheduleIdCollection.cs" />
+    <Compile Include="Schedules\ScheduleOptions.cs" />
+    <Compile Include="PriorityOption.cs" />
+    <Compile Include="Schedules\SchedulePayload.cs" />
+    <Compile Include="Schedules\SchedulePayloadCollection.cs" />
+    <Compile Include="Tasks\TaskInfoCollection.cs" />
+    <Compile Include="Tasks\TaskClient.cs" />
+    <Compile Include="Tasks\TaskId.cs" />
+    <Compile Include="Tasks\TaskIdCollection.cs" />
+    <Compile Include="Tasks\TaskListFilter.cs" />
+    <Compile Include="Tasks\TaskOptions.cs" />
+    <Compile Include="Tasks\TaskPayload.cs" />
+    <Compile Include="Tasks\TaskPayloadCollection.cs" />
+    <Compile Include="TaskPriority.cs" />
+    <Compile Include="Tasks\TaskProgress.cs" />
+    <Compile Include="Schedules\ScheduleInfoCollection.cs" />
+    <Compile Include="Schedules\ScheduleInfo.cs" />
+    <Compile Include="TaskStates.cs" />
+    <Compile Include="Tasks\TaskWebhookResponse.cs" />
+    <Compile Include="Tasks\TaskInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\IronSharp.Core\IronSharp.Core.csproj">
+      <Project>{1a6cc922-40a5-440a-868d-757fcdb08622}</Project>
+      <Name>IronSharp.Core</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

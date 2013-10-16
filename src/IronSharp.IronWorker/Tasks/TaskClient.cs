@@ -1,0 +1,215 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.Linq;
+using IronSharp.Core;
+using Newtonsoft.Json;
+
+namespace IronSharp.IronWorker
+{
+    public class TaskClient
+    {
+        private readonly Client _client;
+
+        public TaskClient(Client client)
+        {
+            _client = client;
+        }
+
+        public string EndPoint
+        {
+            get { return string.Format("{0}/tasks", _client.EndPoint); }
+        }
+
+        /// <summary>
+        /// Cancel a Task
+        /// </summary>
+        /// <param name="taskId"> The ID of the task you want to cancel. </param>
+        /// <remarks>
+        /// http://dev.iron.io/worker/reference/api/#cancel_a_task
+        /// </remarks>
+        public bool Cancel(string taskId)
+        {
+            return RestClient.Post<ResponseMsg>(_client.Config, string.Format("{0}/cancel", TaskEndPoint(taskId))).HasExpectedMessage("Cancelled");
+        }
+
+        public TaskIdCollection Create(string codeName, object payload, TaskOptions options = null, JsonSerializerSettings settings = null)
+        {
+            return Create(new TaskPayloadCollection(codeName, payload, options, settings));
+        }
+
+        public TaskIdCollection Create(string codeName, IEnumerable<object> payloads, TaskOptions options = null, JsonSerializerSettings settings = null)
+        {
+            return Create(new TaskPayloadCollection(codeName, payloads, options, settings));
+        }
+
+        public TaskIdCollection Create(string codeName, IEnumerable<string> payloads, TaskOptions options = null)
+        {
+            return Create(new TaskPayloadCollection(codeName, payloads, options));
+        }
+
+        public TaskIdCollection Create(string codeName, string payload, TaskOptions options = null)
+        {
+            return Create(new TaskPayloadCollection(codeName, payload, options));
+        }
+
+        public TaskIdCollection Create(TaskPayload payload)
+        {
+            return Create(new TaskPayloadCollection(payload));
+        }
+
+        public TaskIdCollection Create(IEnumerable<TaskPayload> payloads)
+        {
+            return Create(new TaskPayloadCollection(payloads));
+        }
+
+        /// <summary>
+        /// Queue a Task
+        /// </summary>
+        /// <param name="collection"></param>
+        /// <remarks>
+        /// http://dev.iron.io/worker/reference/api/#queue_a_task
+        /// </remarks>
+        public TaskIdCollection Create(TaskPayloadCollection collection)
+        {
+            return RestClient.Post<TaskIdCollection>(_client.Config, EndPoint, collection);
+        }
+
+        /// <summary>
+        /// Get info about a task
+        /// </summary>
+        /// <param name="taskId"> The ID of the task you want details on. </param>
+        /// <remarks>
+        /// http://dev.iron.io/worker/reference/api/#get_info_about_a_task
+        /// </remarks>
+        public TaskInfo Get(string taskId)
+        {
+            return RestClient.Get<TaskInfo>(_client.Config, TaskEndPoint(taskId));
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="codeName"> The name of your worker (code package). </param>
+        /// <param name="filter">List filtering options</param>
+        /// <remarks>
+        /// http://dev.iron.io/worker/reference/api/#list_tasks
+        /// </remarks>
+        public TaskInfoCollection List(string codeName, TaskListFilter filter = null)
+        {
+            var query = new NameValueCollection
+            {
+                {"code_name", codeName},
+            };
+
+            if (filter != null)
+            {
+                ApplyPageRangeFilter(query, filter.Page, filter.PerPage);
+
+                ApplyDateRangeFilters(query, filter.FromTime, filter.ToTime);
+
+                ApplyStatusFilter(query, filter.Status);
+            }
+
+            return RestClient.Get<TaskInfoCollection>(_client.Config, EndPoint, query).Result;
+        }
+
+        /// <summary>
+        /// Get a Task’s Log
+        /// </summary>
+        /// <param name="taskId"> The ID of the task whose log you are retrieving </param>
+        /// <remarks>
+        /// http://dev.iron.io/worker/reference/api/#get_a_tasks_log
+        /// </remarks>
+        public string Log(string taskId)
+        {
+            return RestClient.Get<string>(_client.Config, string.Format("{0}/log", TaskEndPoint(taskId)));
+        }
+
+        /// <summary>
+        /// Set a Task’s Progress
+        /// </summary>
+        /// <param name="taskId"> The ID of the task whose progress you are updating. </param>
+        /// <param name="taskProgress"> </param>
+        /// <remarks>
+        /// http://dev.iron.io/worker/reference/api/#set_a_tasks_progress
+        /// </remarks>
+        public bool Progress(string taskId, TaskProgress taskProgress)
+        {
+            return RestClient.Post<ResponseMsg>(_client.Config, string.Format("{0}/progress", TaskEndPoint(taskId)), taskProgress).HasExpectedMessage("Progress set");
+        }
+
+        /// <summary>
+        /// Retry a task
+        /// </summary>
+        /// <param name="taskId"> The ID of the task you want to retry. </param>
+        /// <param name="delay"> The number of seconds the task should be delayed before it runs again. </param>
+        /// <remarks>
+        /// http://dev.iron.io/worker/reference/api/#retry_a_task
+        /// </remarks>
+        public TaskIdCollection Retry(string taskId, int? delay = null)
+        {
+            object payload = null;
+
+            if (delay.HasValue)
+            {
+                payload = new {delay};
+            }
+
+            return RestClient.Post<TaskIdCollection>(_client.Config, string.Format("{0}/retry", TaskEndPoint(taskId)), payload);
+        }
+
+        public string TaskEndPoint(string taskId)
+        {
+            return string.Format("{0}/tasks/{1}", _client.EndPoint, taskId);
+        }
+
+        public TaskIdCollection Webhook(string codeName, object value)
+        {
+            if (codeName == null) throw new ArgumentNullException("codeName");
+
+            var query = new NameValueCollection
+            {
+                {"code_name", codeName}
+            };
+
+            return RestClient.Post<TaskIdCollection>(_client.Config, EndPoint + "/webhook", value, query);
+        }
+
+        private static void ApplyDateRangeFilters(NameValueCollection query, DateTime? fromTime, DateTime? toTime)
+        {
+            if (fromTime.HasValue)
+            {
+                query.Add("from_time", Convert.ToString(DateTimeHelpers.SecondsSinceEpoch(fromTime.Value)));
+            }
+
+            if (toTime.HasValue)
+            {
+                query.Add("to_time", Convert.ToString(DateTimeHelpers.SecondsSinceEpoch(toTime.Value)));
+            }
+        }
+
+        private static void ApplyPageRangeFilter(NameValueCollection query, int? page, int? perPage)
+        {
+            if (page.HasValue && page.Value > 0)
+            {
+                query.Add("page", Convert.ToString(page.Value));
+            }
+
+            if (perPage.HasValue && perPage.Value > 0)
+            {
+                query.Add("per_page", Convert.ToString(perPage.Value));
+            }
+        }
+
+        private static void ApplyStatusFilter(NameValueCollection query, TaskStates statusFilter)
+        {
+            var statesToCheck = new[] {TaskStates.Queued, TaskStates.Running, TaskStates.Complete, TaskStates.Error, TaskStates.Cancelled, TaskStates.Killed, TaskStates.Timeout};
+
+            foreach (TaskStates state in statesToCheck.Where(x => statusFilter.HasFlag(x)))
+            {
+                query.Add(Convert.ToString(state).ToLower(), "1");
+            }
+        }
+    }
+}

@@ -35,16 +35,16 @@ namespace IronSharp.IronMQ
             }
         }
 
-        public MessageCollection(object message)
+        public MessageCollection(object message, JsonSerializerSettings opts = null)
         {
-            Messages.Add(new QueueMessage(message));
+            Messages.Add(new QueueMessage(message, opts));
         }
 
-        public MessageCollection(IEnumerable<object> messages)
+        public MessageCollection(IEnumerable<object> messages, JsonSerializerSettings opts = null)
         {
             foreach (object message in messages)
             {
-                Messages.Add(new QueueMessage(message));
+                Messages.Add(new QueueMessage(message, opts));
             }
         }
 

@@ -3,34 +3,27 @@ using System.Threading.Tasks;
 
 namespace IronSharp.Core
 {
-    public class RestResponse<T>
+    public class RestResponse<T> : IMsg
     {
         public RestResponse(HttpResponseMessage responseMessage)
         {
             ResponseMessage = responseMessage;
         }
 
-        public T Result
+        string IMsg.Message
         {
-            get { return ReadResultAsync().Result; }
-        }
-
-        public Task<T> ReadResultAsync()
-        {
-            return ResponseMessage.Content.ReadAsAsync<T>();
+            get
+            {
+                var msg = Msg();
+                return msg == null ? null : msg.Message;
+            }
         }
 
         public HttpResponseMessage ResponseMessage { get; set; }
 
-        public ResponseMsg Msg()
+        public T Result
         {
-            return ResponseMessage.Content.ReadAsAsync<ResponseMsg>().Result;
-        }
-
-        public bool HasExpectedMessage(string message)
-        {
-            var msg = Msg();
-            return msg != null && msg.Message == message;
+            get { return ReadResultAsync().Result; }
         }
 
         public static implicit operator bool(RestResponse<T> value)
@@ -41,6 +34,16 @@ namespace IronSharp.Core
         public static implicit operator T(RestResponse<T> value)
         {
             return value.Result;
+        }
+
+        public ResponseMsg Msg()
+        {
+            return ResponseMessage.Content.ReadAsAsync<ResponseMsg>().Result;
+        }
+
+        public Task<T> ReadResultAsync()
+        {
+            return ResponseMessage.Content.ReadAsAsync<T>();
         }
     }
 }

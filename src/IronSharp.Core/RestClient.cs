@@ -3,6 +3,7 @@ using System.Collections.Specialized;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Threading.Tasks;
 using System.Web;
 
 namespace IronSharp.Core
@@ -29,6 +30,22 @@ namespace IronSharp.Core
             }
 
             return new RestResponse<T>(AttemptRequest(request));
+        }
+
+        public static Task<HttpResponseMessage> Execute(IronClientConfig config, IRestClientRequest request)
+        {
+            HttpRequestMessage httpRequest = BuildRequest(config, new RestClientRequest
+            {
+                EndPoint = request.EndPoint,
+                Query = request.Query,
+                Method = request.Method,
+                Content = request.Content
+            });
+
+            using (var client = new HttpClient())
+            {
+                return client.SendAsync(httpRequest);
+            }
         }
 
         public static RestResponse<T> Get<T>(IronClientConfig config, string endPoint, NameValueCollection query = null)
@@ -124,7 +141,6 @@ namespace IronSharp.Core
 
             return httpRequest;
         }
-
         private static Uri BuildUri(IronClientConfig config, string path, NameValueCollection query)
         {
             if (path.StartsWith("/"))
