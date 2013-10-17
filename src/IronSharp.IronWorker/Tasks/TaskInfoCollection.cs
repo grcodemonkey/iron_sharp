@@ -1,10 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Threading;
+using IronSharp.Core;
 using Newtonsoft.Json;
 
 namespace IronSharp.IronWorker
 {
-    public class TaskInfoCollection
+    public class TaskInfoCollection : IInspectable
     {
         private List<TaskInfo> _tasks;
 
