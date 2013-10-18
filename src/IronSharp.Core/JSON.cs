@@ -10,7 +10,7 @@ namespace IronSharp.Core
 
         public static JsonSerializerSettings Settings
         {
-            get { return LazyInitializer.EnsureInitialized(ref _settings, GetDefaultSerializerSettings ); }
+            get { return LazyInitializer.EnsureInitialized(ref _settings, GetDefaultSerializerSettings); }
             set { _settings = value; }
         }
 
@@ -31,6 +31,11 @@ namespace IronSharp.Core
 
         public static T Parse<T>(string value, JsonSerializerSettings opts = null)
         {
+            if (value is T)
+            {
+                return (T)Convert.ChangeType(value, typeof(T));
+            }
+
             return JsonConvert.DeserializeObject<T>(value, opts ?? Settings);
         }
     }

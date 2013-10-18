@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Specialized;
 using IronSharp.Core;
 using Newtonsoft.Json;
 
@@ -7,70 +6,46 @@ namespace IronSharp.IronCache
 {
     public class CacheClient
     {
+        private readonly string _cacheName;
         private readonly Client _client;
 
-        public CacheClient(Client client)
+        public CacheClient(Client client, string cacheName)
         {
             _client = client;
+            _cacheName = cacheName;
         }
 
         /// <summary>
         /// Delete all items in a cache. This cannot be undone.
         /// </summary>
-        /// <param name="cacheName">The name of the cache whose items should be cleared.</param>
         /// <remarks>
         /// http://dev.iron.io/cache/reference/api/#clear_a_cache
         /// </remarks>
-        public bool Clear(string cacheName)
+        public bool Clear()
         {
-            return RestClient.Post<ResponseMsg>(_client.Config, CacheNameEndPoint(cacheName) + "/clear").HasExpectedMessage("Deleted.");
+            return RestClient.Post<ResponseMsg>(_client.Config, string.Format("{0}/clear", CacheNameEndPoint())).HasExpectedMessage("Deleted.");
         }
 
-        /// <summary>
-        /// Delete a cache and all items in it.
-        /// </summary>
-        /// <param name="cacheName">The name of the cache</param>
-        /// <remarks>
-        /// http://dev.iron.io/cache/reference/api/#delete_a_cache
-        /// </remarks>
-        public bool Delete(string cacheName)
+        public bool Delete(string key)
         {
-            return RestClient.Delete<ResponseMsg>(_client.Config, CacheNameEndPoint(cacheName)).HasExpectedMessage("Deleted.");
-        }
-
-        public bool Delete(string cacheName, string key)
-        {
-            return RestClient.Delete<ResponseMsg>(_client.Config, CacheItemEndPoint(cacheName, key)).HasExpectedMessage("Deleted.");
-        }
-
-        /// <summary>
-        /// This call gets general information about a cache.
-        /// </summary>
-        /// <param name="cacheName">The name of the cache</param>
-        /// <remarks>
-        /// http://dev.iron.io/cache/reference/api/#get_info_about_a_cache
-        /// </remarks>
-        public dynamic Get(string cacheName)
-        {
-            return RestClient.Get<dynamic>(_client.Config, CacheNameEndPoint(cacheName));
+            return RestClient.Delete<ResponseMsg>(_client.Config, CacheItemEndPoint(key)).HasExpectedMessage("Deleted.");
         }
 
         /// <summary>
         /// This call retrieves an item from the cache. The item will not be deleted.
         /// </summary>
-        /// <param name="cacheName">The name of the cache the item belongs to.</param>
-        /// <param name="key">The key the item is stored under in the cache.</param>
+        /// <param name="key"> The key the item is stored under in the cache. </param>
         /// <remarks>
         /// http://dev.iron.io/cache/reference/api/#get_an_item_from_a_cache
         /// </remarks>
-        public CacheItem Get(string cacheName, string key)
+        public CacheItem Get(string key)
         {
-            return RestClient.Get<CacheItem>(_client.Config, CacheItemEndPoint(cacheName, key));
+            return RestClient.Get<CacheItem>(_client.Config, CacheItemEndPoint(key));
         }
 
-        public T Get<T>(string cacheName, string key, JsonSerializerSettings settings = null)
+        public T Get<T>(string key, JsonSerializerSettings settings = null)
         {
-            CacheItem item = Get(cacheName, key);
+            CacheItem item = Get(key);
 
             if (item == null || string.IsNullOrEmpty(item.Value))
             {
@@ -80,27 +55,27 @@ namespace IronSharp.IronCache
             return item.ReadValueAs<T>(settings);
         }
 
-        public T GetOrAdd<T>(string cacheName, string key, Func<T> valueFactory, CacheItemOptions options = null, JsonSerializerSettings settings = null)
+        public T GetOrAdd<T>(string key, Func<T> valueFactory, CacheItemOptions options = null, JsonSerializerSettings settings = null)
         {
-            var item = Get<T>(cacheName, key, settings);
+            var item = Get<T>(key, settings);
 
             if (Equals(item, default(T)))
             {
                 item = valueFactory();
-                Put(cacheName, key, item, options, settings);
+                Put(key, item, options, settings);
             }
 
             return item;
         }
 
-        public CacheItem GetOrAdd(string cacheName, string key, Func<CacheItem> valueFactory)
+        public CacheItem GetOrAdd(string key, Func<CacheItem> valueFactory)
         {
-            CacheItem item = Get(cacheName, key);
+            CacheItem item = Get(key);
 
             if (item == null || string.IsNullOrEmpty(item.Value))
             {
                 item = valueFactory();
-                Put(cacheName, key, item);
+                Put(key, item);
             }
 
             return item;
@@ -111,68 +86,58 @@ namespace IronSharp.IronCache
         /// Negative amounts may be passed to decrement the value.
         /// The increment is atomic, so concurrent increments will all be observed.
         /// </summary>
-        /// <param name="cacheName"> The name of the cache. If the cache does not exist, it will be created for you. </param>
         /// <param name="key"> The key of the item to increment </param>
         /// <param name="amount"> The amount to increment the value, as an integer. If negative, the value will be decremented. </param>
         /// <remarks>
         /// http://dev.iron.io/cache/reference/api/#increment_an_items_value
         /// </remarks>
-        public CacheIncrementResult Increment(string cacheName, string key, int amount)
+        public CacheIncrementResult Increment(string key, int amount)
         {
-            return RestClient.Post<CacheIncrementResult>(_client.Config, string.Format("{0}/increment", CacheItemEndPoint(cacheName, key)), new { amount });
+            return RestClient.Post<CacheIncrementResult>(_client.Config, string.Format("{0}/increment", CacheItemEndPoint(key)), new {amount});
         }
 
         /// <summary>
-        /// Get a list of all caches in a project. 100 caches are listed at a time. To see more, use the page parameter.
+        /// This call gets general information about a cache.
         /// </summary>
-        /// <param name="page">The current page</param>
         /// <remarks>
-        /// http://dev.iron.io/cache/reference/api/#list_caches
+        /// http://dev.iron.io/cache/reference/api/#get_info_about_a_cache
         /// </remarks>
-        public CacheInfo[] List(int? page)
+        public CacheInfo Info()
         {
-            var query = new NameValueCollection();
-
-            if (page.HasValue)
-            {
-                query.Add("page", Convert.ToString(page));
-            }
-
-            return RestClient.Get<CacheInfo[]>(_client.Config, _client.EndPoint, query);
+            return RestClient.Get<CacheInfo>(_client.Config, CacheNameEndPoint());
         }
 
-        public bool Put(string cacheName, string key, object value, CacheItemOptions options = null, JsonSerializerSettings settings = null)
+        public bool Put(string key, object value, CacheItemOptions options = null, JsonSerializerSettings settings = null)
         {
-            return Put(cacheName, key, new CacheItem(value, options, settings));
+            return Put(key, new CacheItem(value, options, settings));
         }
 
-        public bool Put(string cacheName, string key, string value, CacheItemOptions options = null)
+        public bool Put(string key, string value, CacheItemOptions options = null)
         {
-            return Put(cacheName, key, new CacheItem(value, options));
+            return Put(key, new CacheItem(value, options));
         }
 
         /// <summary>
         /// This call puts an item into a cache.
         /// </summary>
-        /// <param name="cacheName">The name of the cache. If the cache does not exist, it will be created for you.</param>
-        /// <param name="key">The key to store the item under in the cache.</param>
-        /// <param name="item">The item’s data</param>
+        /// <param name="key"> The key to store the item under in the cache. </param>
+        /// <param name="item"> The item’s data </param>
         /// <remarks>
         /// http://dev.iron.io/cache/reference/api/#put_an_item_into_a_cache
         /// </remarks>
-        public bool Put(string cacheName, string key, CacheItem item)
+        public bool Put(string key, CacheItem item)
         {
-            return RestClient.Put<ResponseMsg>(_client.Config, CacheItemEndPoint(cacheName, key), item).HasExpectedMessage("Stored.");
+            return RestClient.Put<ResponseMsg>(_client.Config, CacheItemEndPoint(key), item).HasExpectedMessage("Stored.");
         }
 
-        private string CacheItemEndPoint(string cacheName, string key)
+        private string CacheItemEndPoint(string key)
         {
-            return string.Format("{0}/items/{1}", CacheNameEndPoint(cacheName), key);
+            return string.Format("{0}/items/{1}", CacheNameEndPoint(), key);
         }
 
-        private string CacheNameEndPoint(string cacheName)
+        private string CacheNameEndPoint()
         {
-            return string.Format("{0}/{1}", _client.EndPoint, cacheName);
+            return string.Format("{0}/{1}", _client.EndPoint, _cacheName);
         }
     }
 }
