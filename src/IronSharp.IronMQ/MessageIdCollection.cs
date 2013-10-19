@@ -9,6 +9,10 @@ namespace IronSharp.IronMQ
     {
         private List<string> _ids;
 
+        public MessageIdCollection()
+        {
+        }
+
         public MessageIdCollection(IEnumerable<string> messageIds)
         {
             Ids.AddRange(messageIds);

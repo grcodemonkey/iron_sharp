@@ -1,9 +1,12 @@
-﻿using Newtonsoft.Json;
+﻿using System.Threading;
+using Newtonsoft.Json;
 
 namespace IronSharp.Core
 {
     public class IronClientConfig
     {
+        private IronSharpConfig _sharpConfig;
+
         [JsonProperty("host")]
         public string Host { get; set; }
 
@@ -15,5 +18,20 @@ namespace IronSharp.Core
 
         [JsonProperty("version")]
         public int Version { get; set; }
+
+        [JsonProperty("sharp_config")]
+        public IronSharpConfig SharpConfig
+        {
+            get { return LazyInitializer.EnsureInitialized(ref _sharpConfig, CreateDefaultIronSharpConfig); }
+            set { _sharpConfig = value; }
+        }
+
+        private static IronSharpConfig CreateDefaultIronSharpConfig()
+        {
+            return new IronSharpConfig
+            {
+                BackoffFactor = 25
+            };
+        }
     }
 }

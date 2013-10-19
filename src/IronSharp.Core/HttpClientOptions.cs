@@ -5,7 +5,7 @@
         static HttpClientOptions()
         {
             EnableRetry = true;
-            RetryLimit = 5;
+            RetryLimit = 4;
         }
 
         public static bool EnableRetry { get; set; }

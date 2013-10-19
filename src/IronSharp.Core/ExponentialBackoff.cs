@@ -5,9 +5,9 @@ namespace IronSharp.Core
 {
     internal static class ExponentialBackoff
     {
-        public static void Sleep(int attempt)
+        public static void Sleep(double backoffFactor, int attempt)
         {
-            Thread.Sleep(TimeSpan.FromSeconds(Math.Pow(3.0, attempt)));
+            Thread.Sleep(TimeSpan.FromMilliseconds(Math.Pow(backoffFactor, attempt)));
         }
     }
 }

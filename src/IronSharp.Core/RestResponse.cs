@@ -1,29 +1,41 @@
 ﻿using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace IronSharp.Core
 {
-    public class RestResponse<T> : IMsg
+    public class RestResponse<T> : IMsg where T: class 
     {
+        private T _result;
+
         public RestResponse(HttpResponseMessage responseMessage)
         {
             ResponseMessage = responseMessage;
         }
 
-        string IMsg.Message
+        public HttpContent Content
         {
-            get
-            {
-                var msg = Msg();
-                return msg == null ? null : msg.Message;
-            }
+            get { return ResponseMessage.Content; }
         }
 
         public HttpResponseMessage ResponseMessage { get; set; }
 
         public T Result
         {
-            get { return ReadResultAsync().Result; }
+            get
+            {
+                SetResult();
+                return _result;
+            }
+        }
+
+        string IMsg.Message
+        {
+            get
+            {
+                ResponseMsg msg = Msg();
+                return msg == null ? null : msg.Message;
+            }
         }
 
         public static implicit operator bool(RestResponse<T> value)
@@ -36,14 +48,32 @@ namespace IronSharp.Core
             return value.Result;
         }
 
+        public bool CanReadResult()
+        {
+            try
+            {
+                SetResult();
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         public ResponseMsg Msg()
         {
-            return ResponseMessage.Content.ReadAsAsync<ResponseMsg>().Result;
+            return Content.ReadAsAsync<ResponseMsg>().Result;
         }
 
         public Task<T> ReadResultAsync()
         {
-            return ResponseMessage.Content.ReadAsAsync<T>();
+            return Content.ReadAsAsync<T>();
+        }
+
+        private void SetResult()
+        {
+            LazyInitializer.EnsureInitialized(ref _result, () => ReadResultAsync().Result);
         }
     }
 }

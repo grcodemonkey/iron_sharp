@@ -13,10 +13,6 @@ namespace IronSharp.IronWorker
         {
         }
 
-        public TaskPayload(string codeName, object payload, TaskOptions options = null, JsonSerializerSettings settings  = null) : this(codeName, JSON.Generate(payload, settings), options)
-        {
-        }
-
         public TaskPayload(string codeName, string payload, TaskOptions options = null)
         {
             CodeName = codeName;

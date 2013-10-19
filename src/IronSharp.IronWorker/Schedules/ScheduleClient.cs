@@ -1,13 +1,19 @@
-﻿using IronSharp.Core;
+﻿using System;
+using System.Diagnostics.Contracts;
+using System.Net.Http;
+using IronSharp.Core;
 
 namespace IronSharp.IronWorker
 {
     public class ScheduleClient
     {
-        private readonly Client _client;
+        private readonly IronWorkerRestClient _client;
 
-        public ScheduleClient(Client client)
+        public ScheduleClient(IronWorkerRestClient client)
         {
+            if (client == null) throw new ArgumentNullException("client");
+            Contract.EndContractBlock();
+
             _client = client;
         }
 
@@ -16,21 +22,21 @@ namespace IronSharp.IronWorker
             get { return string.Format("{0}/schedules", _client.EndPoint); }
         }
 
-        public string ScheduleEndPoint(string scheduleId)
+        public IValueSerializer ValueSerializer
         {
-            return string.Format("{0}/{1}", EndPoint, scheduleId);
+            get
+            {
+                return _client.Config.SharpConfig.ValueSerializer;
+            }
+        }
+        public bool Cancel(string scheduleId)
+        {
+            return RestClient.Post<ResponseMsg>(_client.Config, ScheduleEndPoint(scheduleId) + "/cancel").HasExpectedMessage("Cancelled");
         }
 
-        /// <summary>
-        /// List Scheduled Tasks
-        /// </summary>
-        /// <param name="filter"> </param>
-        /// <remarks>
-        /// http://dev.iron.io/worker/reference/api/#list_scheduled_tasks
-        /// </remarks>
-        public ScheduleInfoCollection List(PagingFilter filter = null)
+        public ScheduleIdCollection Create(string codeName, object payload, ScheduleOptions options)
         {
-            return RestClient.Get<ScheduleInfoCollection>(_client.Config, EndPoint, filter);
+            return Create(codeName, ValueSerializer.Generate(payload), options);
         }
 
         public ScheduleIdCollection Create(string codeName, string payload, ScheduleOptions options)
@@ -48,9 +54,21 @@ namespace IronSharp.IronWorker
             return RestClient.Get<ScheduleInfo>(_client.Config, ScheduleEndPoint(scheduleId));
         }
 
-        public bool Cancel(string scheduleId)
+        /// <summary>
+        /// List Scheduled Tasks
+        /// </summary>
+        /// <param name="filter"> </param>
+        /// <remarks>
+        /// http://dev.iron.io/worker/reference/api/#list_scheduled_tasks
+        /// </remarks>
+        public ScheduleInfoCollection List(PagingFilter filter = null)
         {
-            return RestClient.Post<ResponseMsg>(_client.Config, ScheduleEndPoint(scheduleId) + "/cancel").HasExpectedMessage("Cancelled");
+            return RestClient.Get<ScheduleInfoCollection>(_client.Config, EndPoint, filter);
+        }
+
+        public string ScheduleEndPoint(string scheduleId)
+        {
+            return string.Format("{0}/{1}", EndPoint, scheduleId);
         }
     }
 }

@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Specialized;
+using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using System.Web;
+using System.Web.Caching;
 
 namespace IronSharp.Core
 {
@@ -15,7 +17,7 @@ namespace IronSharp.Core
             return new HttpClient { BaseAddress = baseAddress };
         }
 
-        public static RestResponse<T> Delete<T>(IronClientConfig config, string endPoint, NameValueCollection query = null, Object payload = null)
+        public static RestResponse<T> Delete<T>(IronClientConfig config, string endPoint, NameValueCollection query = null, Object payload = null) where T : class 
         {
             HttpRequestMessage request = BuildRequest(config, new RestClientRequest
             {
@@ -24,12 +26,14 @@ namespace IronSharp.Core
                 Method = HttpMethod.Delete
             });
 
+            IronSharpConfig sharpConfig = config.SharpConfig;
+
             if (payload != null)
             {
-                request.Content = new JsonContent(payload);
+                request.Content = new JsonContent(sharpConfig.ValueSerializer, payload);
             }
 
-            return new RestResponse<T>(AttemptRequest(request));
+            return new RestResponse<T>(AttemptRequest(sharpConfig, request));
         }
 
         public static Task<HttpResponseMessage> Execute(IronClientConfig config, IRestClientRequest request)
@@ -48,7 +52,7 @@ namespace IronSharp.Core
             }
         }
 
-        public static RestResponse<T> Get<T>(IronClientConfig config, string endPoint, NameValueCollection query = null)
+        public static RestResponse<T> Get<T>(IronClientConfig config, string endPoint, NameValueCollection query = null) where T : class 
         {
             HttpRequestMessage request = BuildRequest(config, new RestClientRequest
             {
@@ -57,10 +61,10 @@ namespace IronSharp.Core
                 Method = HttpMethod.Get
             });
 
-            return new RestResponse<T>(AttemptRequest(request));
+            return new RestResponse<T>(AttemptRequest(config.SharpConfig, request));
         }
 
-        public static RestResponse<T> Post<T>(IronClientConfig config, string endPoint, object payload = null, NameValueCollection query = null)
+        public static RestResponse<T> Post<T>(IronClientConfig config, string endPoint, object payload = null, NameValueCollection query = null) where T : class 
         {
             HttpRequestMessage request = BuildRequest(config, new RestClientRequest
             {
@@ -69,15 +73,27 @@ namespace IronSharp.Core
                 Method = HttpMethod.Post
             });
 
+            IronSharpConfig sharpConfig = config.SharpConfig;
+
             if (payload != null)
             {
-                request.Content = new JsonContent(payload);
+                request.Content = new JsonContent(sharpConfig.ValueSerializer, payload);
             }
 
-            return new RestResponse<T>(AttemptRequest(request));
+            using (var sw = new StringWriter())
+            {
+                sw.WriteLine("Request: {0}", request.RequestUri);
+                if (request.Content != null)
+                {
+                    sw.WriteLine(request.Content.ReadAsStringAsync().Result);
+                }
+                File.AppendAllText("log.txt", sw.ToString());
+            }
+
+            return new RestResponse<T>(AttemptRequest(sharpConfig, request));
         }
 
-        public static RestResponse<T> Put<T>(IronClientConfig config, string endPoint, object payload, NameValueCollection query = null)
+        public static RestResponse<T> Put<T>(IronClientConfig config, string endPoint, object payload, NameValueCollection query = null) where T : class 
         {
             HttpRequestMessage request = BuildRequest(config, new RestClientRequest
             {
@@ -86,15 +102,17 @@ namespace IronSharp.Core
                 Method = HttpMethod.Put
             });
 
+            IronSharpConfig sharpConfig = config.SharpConfig;
+
             if (payload != null)
             {
-                request.Content = new JsonContent(payload);
+                request.Content = new JsonContent(sharpConfig.ValueSerializer, payload);
             }
 
-            return new RestResponse<T>(AttemptRequest(request));
+            return new RestResponse<T>(AttemptRequest(sharpConfig, request));
         }
 
-        private static HttpResponseMessage AttemptRequest(HttpRequestMessage request, int attempt = 0)
+        private static HttpResponseMessage AttemptRequest(IronSharpConfig sharpConfig, HttpRequestMessage request, int attempt = 0)
         {
             if (attempt > HttpClientOptions.RetryLimit)
             {
@@ -114,9 +132,9 @@ namespace IronSharp.Core
                 {
                     attempt++;
 
-                    ExponentialBackoff.Sleep(attempt);
+                    ExponentialBackoff.Sleep(sharpConfig.BackoffFactor, attempt);
 
-                    return AttemptRequest(request, attempt);
+                    return AttemptRequest(sharpConfig, request, attempt);
                 }
 
                 return response;
@@ -141,6 +159,7 @@ namespace IronSharp.Core
 
             return httpRequest;
         }
+
         private static Uri BuildUri(IronClientConfig config, string path, NameValueCollection query)
         {
             if (path.StartsWith("/"))

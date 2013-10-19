@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
 using IronSharp.Core;
-using Newtonsoft.Json;
 
 namespace IronSharp.IronMQ
 {
@@ -15,10 +14,10 @@ namespace IronSharp.IronMQ
     /// </remarks>
     public class QueueClient
     {
-        private readonly Client _client;
+        private readonly IronMqRestClient _client;
         private readonly string _name;
 
-        public QueueClient(Client client, string name)
+        public QueueClient(IronMqRestClient client, string name)
         {
             _client = client;
             _name = name;
@@ -27,6 +26,11 @@ namespace IronSharp.IronMQ
         public string EndPoint
         {
             get { return string.Format("{0}/{1}", _client.EndPoint, _name); }
+        }
+
+        public IValueSerializer ValueSerializer
+        {
+            get { return _client.Config.SharpConfig.ValueSerializer; }
         }
 
         #region Queue
@@ -102,8 +106,7 @@ namespace IronSharp.IronMQ
         /// </remarks>
         public bool Delete(IEnumerable<string> messageIds)
         {
-            return
-                RestClient.Delete<ResponseMsg>(_client.Config, string.Format("{0}/messages", EndPoint), payload: new MessageIdCollection(messageIds)).HasExpectedMessage("Deleted");
+            return RestClient.Delete<ResponseMsg>(_client.Config, string.Format("{0}/messages", EndPoint), payload: new MessageIdCollection(messageIds)).HasExpectedMessage("Deleted");
         }
 
         /// <summary>
@@ -155,7 +158,14 @@ namespace IronSharp.IronMQ
                 query.Add("timeout", Convert.ToString(timeout));
             }
 
-            return RestClient.Get<MessageCollection>(_client.Config, string.Format("{0}/messages", EndPoint), query);
+            RestResponse<MessageCollection> result = RestClient.Get<MessageCollection>(_client.Config, string.Format("{0}/messages", EndPoint), query);
+
+            if (result.CanReadResult())
+            {
+                return LinkMessageCollection(result);
+            }
+
+            throw new RestResponseException("Unable to read MessageCollection response", result.ResponseMessage);
         }
 
         /// <summary>
@@ -185,7 +195,15 @@ namespace IronSharp.IronMQ
                 query.Add("n", Convert.ToString(n));
             }
 
-            return RestClient.Get<MessageCollection>(_client.Config, string.Format("{0}/messages/peek", EndPoint), query);
+            RestResponse<MessageCollection> result = RestClient.Get<MessageCollection>(_client.Config, string.Format("{0}/messages/peek", EndPoint), query);
+
+
+            if (result.CanReadResult())
+            {
+                return LinkMessageCollection(result);
+            }
+
+            throw new RestResponseException("Unable to read MessageCollection response", result.ResponseMessage);
         }
 
         /// <summary>
@@ -207,14 +225,14 @@ namespace IronSharp.IronMQ
             return Post(new MessageCollection(messages));
         }
 
-        public MessageIdCollection Post(object message, JsonSerializerSettings opts = null)
+        public MessageIdCollection Post(object message)
         {
-            return Post(new MessageCollection(message, opts));
+            return Post(new MessageCollection(ValueSerializer.Generate(message)));
         }
 
-        public MessageIdCollection Post(IEnumerable<object> messages, JsonSerializerSettings opts = null)
+        public MessageIdCollection Post(IEnumerable<object> messages)
         {
-            return Post(new MessageCollection(messages, opts));
+            return Post(new MessageCollection(messages.Select(ValueSerializer.Generate)));
         }
 
         public MessageIdCollection Post(string message)
@@ -285,6 +303,17 @@ namespace IronSharp.IronMQ
             return RestClient.Post<ResponseMsg>(_client.Config, string.Format("{0}/messages/{1}/touch", EndPoint, messageId)).HasExpectedMessage("Touched");
         }
 
+        private MessageCollection LinkMessageCollection(RestResponse<MessageCollection> response)
+        {
+            MessageCollection messageCollection = response.Result;
+
+            foreach (QueueMessage msg in messageCollection.Messages)
+            {
+                msg.Client = this;
+            }
+
+            return messageCollection;
+        }
         #endregion
 
         #region Subscribers
@@ -301,20 +330,24 @@ namespace IronSharp.IronMQ
         }
 
         /// <summary>
-        /// Removes subscribers from a queue. This is for Push Queues only.
+        /// This is only for use with long running processes that have previously returned a 202.
+        /// See http://dev.iron.io/mq/reference/push_queues/#how_the_endpoint_should_handle_push_messages for more information.
         /// </summary>
+        /// <param name="messageId"> The id of the message. </param>
+        /// <param name="subscriberId"> The id of the subscriber to delete. </param>
         /// <remarks>
-        /// http://dev.iron.io/mq/reference/api/#remove_subscribers_from_a_queue
+        /// http://dev.iron.io/mq/reference/api/#acknowledge__delete_push_message_for_a_subscriber
         /// </remarks>
-        public QueueInfo RemoveSubscribers(SubscriberCollection subscriberCollection)
+        public bool Delete(string messageId, string subscriberId)
         {
-            return RestClient.Delete<QueueInfo>(_client.Config, string.Format("{0}/subscribers", EndPoint), payload: subscriberCollection);
+            return RestClient.Get<ResponseMsg>(_client.Config, string.Format("{0}/messages/{1}/subscribers/{2}", EndPoint, messageId, subscriberId)).HasExpectedMessage("Deleted");
         }
 
         /// <summary>
-        /// You can retrieve the push status for a particular message which will let you know which subscribers have received the message, which have failed, how many times it’s tried to be delivered and the status code returned from the endpoint.
+        /// You can retrieve the push status for a particular message which will let you know which subscribers have received the message, which have failed, how many times it’s tried to be
+        /// delivered and the status code returned from the endpoint.
         /// </summary>
-        /// <param name="messageId">The message ID</param>
+        /// <param name="messageId"> The message ID </param>
         /// <remarks>
         /// http://dev.iron.io/mq/reference/api/#get_push_status_for_a_message
         /// </remarks>
@@ -324,19 +357,15 @@ namespace IronSharp.IronMQ
         }
 
         /// <summary>
-        /// This is only for use with long running processes that have previously returned a 202.  
-        /// See http://dev.iron.io/mq/reference/push_queues/#how_the_endpoint_should_handle_push_messages for more information.
+        /// Removes subscribers from a queue. This is for Push Queues only.
         /// </summary>
-        /// <param name="messageId">The id of the message.</param>
-        /// <param name="subscriberId">The id of the subscriber to delete.</param>
         /// <remarks>
-        /// http://dev.iron.io/mq/reference/api/#acknowledge__delete_push_message_for_a_subscriber
+        /// http://dev.iron.io/mq/reference/api/#remove_subscribers_from_a_queue
         /// </remarks>
-        public bool Delete(string messageId, string subscriberId)
+        public QueueInfo RemoveSubscribers(SubscriberCollection subscriberCollection)
         {
-            return RestClient.Get<ResponseMsg>(_client.Config, string.Format("{0}/messages/{1}/subscribers/{2}", EndPoint, messageId, subscriberId)).HasExpectedMessage("Deleted");
+            return RestClient.Delete<QueueInfo>(_client.Config, string.Format("{0}/subscribers", EndPoint), payload: subscriberCollection);
         }
-
         #endregion
     }
 }

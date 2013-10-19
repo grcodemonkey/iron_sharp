@@ -13,7 +13,7 @@ namespace IronSharp.IronWorker
         public TaskPriority Priority { get; set; }
 
         [JsonProperty("priority", DefaultValueHandling = DefaultValueHandling.Ignore)]
-        protected string PriorityValue
+        protected int? PriorityValue
         {
             get
             {
@@ -22,14 +22,14 @@ namespace IronSharp.IronWorker
                     case TaskPriority.Default:
                         return null;
                     case TaskPriority.Medium:
-                        return "1";
+                        return 1;
                     case TaskPriority.High:
-                        return "2";
+                        return 2;
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
             }
-            set { Priority = value.As<TaskPriority>(); }
+            set { Priority = (TaskPriority) value.GetValueOrDefault(); }
         }
     }
 }

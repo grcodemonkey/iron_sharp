@@ -1,16 +1,10 @@
-﻿using IronSharp.Core;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 
 namespace IronSharp.IronCache
 {
     public class CacheItem : CacheItemOptions
     {
         public CacheItem()
-        {
-        }
-
-        public CacheItem(object value, CacheItemOptions options = null, JsonSerializerSettings settings = null)
-            : this(JSON.Generate(value, settings), options)
         {
         }
 
@@ -35,9 +29,12 @@ namespace IronSharp.IronCache
         [JsonProperty("value")]
         public string Value { get; set; }
 
-        public T ReadValueAs<T>(JsonSerializerSettings settings = null)
+        [JsonIgnore]
+        internal CacheClient Client { get; set; }
+
+        public T ReadValueAs<T>()
         {
-            return JSON.Parse<T>(Value, settings);
+            return Client.ValueSerializer.Parse<T>(Value);
         }
     }
 }

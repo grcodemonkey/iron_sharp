@@ -1,24 +1,32 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using IronSharp.Core;
-using Newtonsoft.Json;
 
 namespace IronSharp.IronWorker
 {
     public class TaskClient
     {
-        private readonly Client _client;
+        private readonly IronWorkerRestClient _client;
 
-        public TaskClient(Client client)
+        public TaskClient(IronWorkerRestClient client)
         {
+            if (client == null) throw new ArgumentNullException("client");
+            Contract.EndContractBlock();
+
             _client = client;
         }
 
         public string EndPoint
         {
             get { return string.Format("{0}/tasks", _client.EndPoint); }
+        }
+
+        public IValueSerializer ValueSerializer
+        {
+            get { return _client.Config.SharpConfig.ValueSerializer; }
         }
 
         /// <summary>
@@ -33,29 +41,55 @@ namespace IronSharp.IronWorker
             return RestClient.Post<ResponseMsg>(_client.Config, string.Format("{0}/cancel", TaskEndPoint(taskId))).HasExpectedMessage("Cancelled");
         }
 
-        public TaskIdCollection Create(string codeName, object payload, TaskOptions options = null, JsonSerializerSettings settings = null)
+        /// <summary>
+        /// Creates a single task
+        /// </summary>
+        /// <param name="codeName">The task Code Name</param>
+        /// <param name="payload">The task payload</param>
+        /// <param name="options">The task options</param>
+        /// <returns>The task id</returns>
+        public string Create(string codeName, object payload, TaskOptions options = null)
         {
-            return Create(new TaskPayloadCollection(codeName, payload, options, settings));
+            return Create(codeName, ValueSerializer.Generate(payload), options);
         }
 
-        public TaskIdCollection Create(string codeName, IEnumerable<object> payloads, TaskOptions options = null, JsonSerializerSettings settings = null)
+        /// <summary>
+        /// Creates a single task
+        /// </summary>
+        /// <param name="codeName">The task Code Name</param>
+        /// <param name="payload">The task payload</param>
+        /// <param name="options">The task options</param>
+        /// <returns>The task id</returns>
+        public string Create(string codeName, string payload, TaskOptions options = null)
         {
-            return Create(new TaskPayloadCollection(codeName, payloads, options, settings));
+            return Create(new TaskPayload(codeName, payload, options));
+        }
+
+        /// <summary>
+        /// Creates a single task
+        /// </summary>
+        /// <param name="payload">The task payload</param>
+        /// <returns>The task id</returns>
+        public string Create(TaskPayload payload)
+        {
+            TaskIdCollection result = Create(new TaskPayloadCollection(payload));
+
+            if (result.Success)
+            {
+                return result.GetIds().FirstOrDefault();
+            }
+
+            throw new IronSharpException(string.Format("Task was not queued successfully: {0}", result.Message));
+        }
+
+        public TaskIdCollection Create(string codeName, IEnumerable<object> payloads, TaskOptions options = null)
+        {
+            return Create(codeName, payloads.Select(ValueSerializer.Generate), options);
         }
 
         public TaskIdCollection Create(string codeName, IEnumerable<string> payloads, TaskOptions options = null)
         {
             return Create(new TaskPayloadCollection(codeName, payloads, options));
-        }
-
-        public TaskIdCollection Create(string codeName, string payload, TaskOptions options = null)
-        {
-            return Create(new TaskPayloadCollection(codeName, payload, options));
-        }
-
-        public TaskIdCollection Create(TaskPayload payload)
-        {
-            return Create(new TaskPayloadCollection(payload));
         }
 
         public TaskIdCollection Create(IEnumerable<TaskPayload> payloads)
@@ -66,7 +100,7 @@ namespace IronSharp.IronWorker
         /// <summary>
         /// Queue a Task
         /// </summary>
-        /// <param name="collection"></param>
+        /// <param name="collection"> </param>
         /// <remarks>
         /// http://dev.iron.io/worker/reference/api/#queue_a_task
         /// </remarks>
@@ -88,10 +122,9 @@ namespace IronSharp.IronWorker
         }
 
         /// <summary>
-        /// 
         /// </summary>
         /// <param name="codeName"> The name of your worker (code package). </param>
-        /// <param name="filter">List filtering options</param>
+        /// <param name="filter"> List filtering options </param>
         /// <remarks>
         /// http://dev.iron.io/worker/reference/api/#list_tasks
         /// </remarks>
@@ -130,7 +163,7 @@ namespace IronSharp.IronWorker
         /// Set a Task’s Progress
         /// </summary>
         /// <param name="taskId"> The ID of the task whose progress you are updating. </param>
-        /// <param name="taskProgress"> </param>
+        /// <param name="taskProgress"> The task progress request </param>
         /// <remarks>
         /// http://dev.iron.io/worker/reference/api/#set_a_tasks_progress
         /// </remarks>

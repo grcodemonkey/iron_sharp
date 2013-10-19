@@ -3,13 +3,8 @@ using Newtonsoft.Json;
 
 namespace IronSharp.IronMQ
 {
-    public class QueueMessage
+    public class QueueMessage : IInspectable
     {
-        public QueueMessage(object body, JsonSerializerSettings opts = null)
-            : this(JSON.Generate(body, opts))
-        {
-        }
-
         public QueueMessage(string body)
             : this()
         {
@@ -19,6 +14,8 @@ namespace IronSharp.IronMQ
         protected QueueMessage()
         {
         }
+
+        #region Properties
 
         /// <summary>
         /// The message data
@@ -42,6 +39,9 @@ namespace IronSharp.IronMQ
         [JsonProperty("expires_in", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public int? ExpiresIn { get; set; }
 
+        [JsonProperty("id")]
+        public string Id { get; set; }
+        
         [JsonProperty("push_status", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public PushStatus PushStatus { get; set; }
 
@@ -57,14 +57,48 @@ namespace IronSharp.IronMQ
         [JsonProperty("timeout", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public int? Timeout { get; set; }
 
+        #endregion
+
+        #region Methods
+
+        /// <summary>
+        /// This call will delete the message. Be sure you call this after you’re done with a message or it will be placed back on the queue.
+        /// </summary>
+        public bool Delete()
+        {
+            return Client.Delete(Id);
+        }
+
+        /// <summary>
+        /// Releases this message and puts it back on the queue as if the message had timed out.
+        /// </summary>
+        /// <returns></returns>
+        public bool Release(int? delay = null)
+        {
+            return Client.Release(Id, delay);
+        }
+
+        /// <summary>
+        /// Extends this message's timeout by the duration specified when the message was created, which is 60 seconds by default.
+        /// </summary>
+        public bool Touch()
+        {
+            return Client.Touch(Id);
+        }
+
+        #endregion
+
+        [JsonIgnore]
+        internal QueueClient Client { get; set; }
+        
         public static implicit operator QueueMessage(string message)
         {
             return new QueueMessage(message);
         }
 
-        public T ReadBodyAs<T>(JsonSerializerSettings opts = null)
+        public T ReadValueAs<T>()
         {
-            return JSON.Parse<T>(Body, opts);
+            return Client.ValueSerializer.Parse<T>(Body);
         }
     }
 }

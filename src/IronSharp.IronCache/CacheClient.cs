@@ -1,18 +1,27 @@
 ﻿using System;
+using System.Diagnostics.Contracts;
 using IronSharp.Core;
-using Newtonsoft.Json;
 
 namespace IronSharp.IronCache
 {
     public class CacheClient
     {
         private readonly string _cacheName;
-        private readonly Client _client;
+        private readonly IronCacheRestClient _client;
 
-        public CacheClient(Client client, string cacheName)
+        public CacheClient(IronCacheRestClient client, string cacheName)
         {
+            if (client == null) throw new ArgumentNullException("client");
+            if (string.IsNullOrEmpty(cacheName)) throw new ArgumentNullException("cacheName");
+            Contract.EndContractBlock();
+
             _client = client;
             _cacheName = cacheName;
+        }
+
+        public IValueSerializer ValueSerializer
+        {
+            get { return _client.Config.SharpConfig.ValueSerializer; }
         }
 
         /// <summary>
@@ -40,10 +49,17 @@ namespace IronSharp.IronCache
         /// </remarks>
         public CacheItem Get(string key)
         {
-            return RestClient.Get<CacheItem>(_client.Config, CacheItemEndPoint(key));
+            RestResponse<CacheItem> response = RestClient.Get<CacheItem>(_client.Config, CacheItemEndPoint(key));
+
+            if (response.CanReadResult())
+            {
+                response.Result.Client = this;
+            }
+
+            return response;
         }
 
-        public T Get<T>(string key, JsonSerializerSettings settings = null)
+        public T Get<T>(string key)
         {
             CacheItem item = Get(key);
 
@@ -52,17 +68,17 @@ namespace IronSharp.IronCache
                 return default(T);
             }
 
-            return item.ReadValueAs<T>(settings);
+            return item.ReadValueAs<T>();
         }
 
-        public T GetOrAdd<T>(string key, Func<T> valueFactory, CacheItemOptions options = null, JsonSerializerSettings settings = null)
+        public T GetOrAdd<T>(string key, Func<T> valueFactory, CacheItemOptions options = null)
         {
-            var item = Get<T>(key, settings);
+            var item = Get<T>(key);
 
             if (Equals(item, default(T)))
             {
                 item = valueFactory();
-                Put(key, item, options, settings);
+                Put(key, item, options);
             }
 
             return item;
@@ -77,6 +93,8 @@ namespace IronSharp.IronCache
                 item = valueFactory();
                 Put(key, item);
             }
+
+            item.Client = this;
 
             return item;
         }
@@ -107,9 +125,9 @@ namespace IronSharp.IronCache
             return RestClient.Get<CacheInfo>(_client.Config, CacheNameEndPoint());
         }
 
-        public bool Put(string key, object value, CacheItemOptions options = null, JsonSerializerSettings settings = null)
+        public bool Put(string key, object value, CacheItemOptions options = null)
         {
-            return Put(key, new CacheItem(value, options, settings));
+            return Put(key, ValueSerializer.Generate(value), options);
         }
 
         public bool Put(string key, string value, CacheItemOptions options = null)

@@ -5,36 +5,9 @@ using IronSharp.Core;
 
 namespace IronSharp.IronCache
 {
-    public class Client
+    public static class Client
     {
-        private readonly IronClientConfig _config;
-
-        private Client(IronClientConfig config)
-        {
-            _config = LazyInitializer.EnsureInitialized(ref config);
-
-            if (string.IsNullOrEmpty(Config.Host))
-            {
-                Config.Host = CloudHosts.DEFAULT;
-            }
-
-            if (config.Version == default (int))
-            {
-                config.Version = 1;
-            }
-        }
-
-        public IronClientConfig Config
-        {
-            get { return _config; }
-        }
-
-        public string EndPoint
-        {
-            get { return "/projects/{Project ID}/caches"; }
-        }
-
-        public static Client @New(string projectId = null, string token = null, string host = null)
+        public static IronCacheRestClient @New(string projectId = null, string token = null, string host = null)
         {
             return New(new IronClientConfig
             {
@@ -44,44 +17,9 @@ namespace IronSharp.IronCache
             });
         }
 
-        public static Client @New(IronClientConfig config = null)
+        public static IronCacheRestClient @New(IronClientConfig config = null)
         {
-            return new Client(config);
-        }
-
-        public CacheClient Cache(string cacheName)
-        {
-            return new CacheClient(this, cacheName);
-        }
-        /// <summary>
-        /// Delete a cache and all items in it.
-        /// </summary>
-        /// <param name="cacheName">The name of the cache</param>
-        /// <remarks>
-        /// http://dev.iron.io/cache/reference/api/#delete_a_cache
-        /// </remarks>
-        public bool Delete(string cacheName)
-        {
-            return RestClient.Delete<ResponseMsg>(_config, string.Format("{0}/{1}", EndPoint, cacheName)).HasExpectedMessage("Deleted.");
-        }
-
-        /// <summary>
-        /// Get a list of all caches in a project. 100 caches are listed at a time. To see more, use the page parameter.
-        /// </summary>
-        /// <param name="page">The current page</param>
-        /// <remarks>
-        /// http://dev.iron.io/cache/reference/api/#list_caches
-        /// </remarks>
-        public CacheInfo[] List(int? page)
-        {
-            var query = new NameValueCollection();
-
-            if (page.HasValue)
-            {
-                query.Add("page", Convert.ToString(page));
-            }
-
-            return RestClient.Get<CacheInfo[]>(_config, EndPoint, query);
+            return new IronCacheRestClient(config);
         }
     }
 }

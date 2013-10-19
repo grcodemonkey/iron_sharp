@@ -6,10 +6,10 @@ namespace IronSharp.IronWorker
 {
     public class CodeClient
     {
-        private readonly Client _client;
+        private readonly IronWorkerRestClient _client;
         private readonly string _codeId;
 
-        public CodeClient(Client client, string codeId)
+        public CodeClient(IronWorkerRestClient client, string codeId)
         {
             _client = client;
             _codeId = codeId;

@@ -26,14 +26,19 @@ namespace IronSharp.Core
 
         public static string Generate(object value, JsonSerializerSettings opts = null)
         {
-            return JsonConvert.SerializeObject(value, opts ?? Settings);
+            return Generate(value, null, opts);
+        }
+
+        public static string Generate(object value, Type type, JsonSerializerSettings opts = null)
+        {
+            return JsonConvert.SerializeObject(value, type, Formatting.None, opts ?? Settings);
         }
 
         public static T Parse<T>(string value, JsonSerializerSettings opts = null)
         {
             if (value is T)
             {
-                return (T)Convert.ChangeType(value, typeof(T));
+                return (T) Convert.ChangeType(value, typeof (T));
             }
 
             return JsonConvert.DeserializeObject<T>(value, opts ?? Settings);
