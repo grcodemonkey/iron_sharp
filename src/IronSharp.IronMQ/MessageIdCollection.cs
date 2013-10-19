@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 
 namespace IronSharp.IronMQ
 {
-    public class MessageIdCollection : IMsg, IInspectable
+    public class MessageIdCollection : IMsg, IInspectable, IIdCollection
     {
         private List<string> _ids;
 
@@ -37,6 +37,11 @@ namespace IronSharp.IronMQ
         public static implicit operator bool(MessageIdCollection collection)
         {
             return collection.Success;
+        }
+
+        IEnumerable<string> IIdCollection.GetIds()
+        {
+            return Ids;
         }
     }
 }

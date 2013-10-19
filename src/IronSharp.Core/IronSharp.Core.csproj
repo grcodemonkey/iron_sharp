@@ -61,6 +61,7 @@
     <Compile Include="ExtensionsForIInspectable.cs" />
     <Compile Include="ExtensionsForIMsg.cs" />
     <Compile Include="ExtensionsForString.cs" />
+    <Compile Include="IIdCollection.cs" />
     <Compile Include="IInspectable.cs" />
     <Compile Include="IIronSharpConfig.cs" />
     <Compile Include="IMsg.cs" />

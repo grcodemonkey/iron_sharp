@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Specialized;
 using System.Configuration;
+using System.Linq;
+using Common.Logging;
+using Common.Logging.Simple;
 using IronSharp.Core;
 using IronSharp.IronCache;
 using IronSharp.IronMQ;
@@ -12,6 +15,8 @@ namespace Demo.IronSharpConsole
     {
         private static void Main(string[] args)
         {
+            LogManager.Adapter = new ConsoleOutLoggerFactoryAdapter();
+
             NameValueCollection appSettings = ConfigurationManager.AppSettings;
 
             IronClientConfig config = IronClientConfig.Read(appSettings);
@@ -40,19 +45,30 @@ namespace Demo.IronSharpConsole
             // Immediately delete an item
             cache.Delete("number_item");
 
+            cache.Put("complex_item", new {greeting = "Hello", target = "world"});
+
+            // Get value from cache by key
+            Console.WriteLine(cache.Get("complex_item").Value);
+
+            cache.Delete("complex_item");
+
             // =========================================================
             // Iron.io MQ
             // =========================================================
 
-            IronMqRestClient ironMq = IronSharp.IronMQ.Client.New(config);
+            IronMqRestClient ironMq = IronSharp.IronMQ.Client.New(new IronClientConfig{Host = IronSharp.IronMQ.CloudHosts.RACKSPACE_ORD, ProjectId = config.ProjectId, Token = config.Token});
 
             // Get a Queue object
             QueueClient queue = ironMq.Queue("my_queue");
 
-            // Put a message on the queue
-            MessageIdCollection result = @queue.Post("hello world!");
+            QueueInfo info = queue.Info();
 
-            Console.WriteLine(result.Inspect());
+            Console.WriteLine(info.Inspect());
+
+            // Put a message on the queue
+            string messageId = @queue.Post("hello world!");
+
+            Console.WriteLine(messageId);
 
             // Get a message
             QueueMessage msg = queue.Next();
@@ -65,6 +81,25 @@ namespace Demo.IronSharpConsole
             Console.WriteLine("Deleted = {0}", deleted);
 
             QueueMessage next;
+
+            var payload1 = new
+            {
+                message = "hello, my name is Iron.io 1"
+            };
+
+            var payload2 = new
+            {
+                message = "hello, my name is Iron.io 2"
+            };
+
+            var payload3 = new
+            {
+                message = "hello, my name is Iron.io 3"
+            };
+            
+            MessageIdCollection queuedUp = queue.Post(new[] {payload1, payload2, payload3});
+
+            Console.WriteLine(queuedUp.Inspect());
 
             while (queue.Read(out next))
             {
@@ -104,6 +139,8 @@ namespace Demo.IronSharpConsole
             ScheduleIdCollection schedule = workerClient.Schedules.Create("Test", payload, options);
 
             Console.WriteLine(schedule.Inspect());
+
+            workerClient.Schedules.Cancel(schedule.Schedules.First().Id);
 
             Console.WriteLine("============= Done ==============");
             Console.Read();

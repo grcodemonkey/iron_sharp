@@ -52,6 +52,7 @@
     <Compile Include="IronMqRestClient.cs" />
     <Compile Include="MessageCollection.cs" />
     <Compile Include="MessageIdCollection.cs" />
+    <Compile Include="MessageOptions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PushStatus.cs" />
     <Compile Include="PushType.cs" />

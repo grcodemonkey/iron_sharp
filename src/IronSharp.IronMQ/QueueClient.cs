@@ -215,36 +215,43 @@ namespace IronSharp.IronMQ
             return Peek(1).Messages.FirstOrDefault();
         }
 
-        public MessageIdCollection Post(QueueMessage message)
+        public string Post(QueueMessage message)
         {
-            return Post(new MessageCollection(message));
+            MessageIdCollection result = Post(new MessageCollection(message));
+
+            if (result.Success)
+            {
+                return result.Ids.FirstOrDefault();
+            }
+
+            throw new IronSharpException("Failed to queue message");
+        }
+
+        public string Post(object message, MessageOptions options = null)
+        {
+            return Post(new QueueMessage(ValueSerializer.Generate(message), options));
+        }
+
+        public string Post(string message, MessageOptions options = null)
+        {
+            return Post(new QueueMessage(message, options));
+        }
+
+        public MessageIdCollection Post(IEnumerable<object> messages, MessageOptions options = null)
+        {
+            return Post(messages.Select(ValueSerializer.Generate), options);
+        }
+
+        public MessageIdCollection Post(IEnumerable<string> messages, MessageOptions options = null)
+        {
+            return Post(new MessageCollection(messages, options));
         }
 
         public MessageIdCollection Post(IEnumerable<QueueMessage> messages)
         {
             return Post(new MessageCollection(messages));
         }
-
-        public MessageIdCollection Post(object message)
-        {
-            return Post(new MessageCollection(ValueSerializer.Generate(message)));
-        }
-
-        public MessageIdCollection Post(IEnumerable<object> messages)
-        {
-            return Post(new MessageCollection(messages.Select(ValueSerializer.Generate)));
-        }
-
-        public MessageIdCollection Post(string message)
-        {
-            return Post(new MessageCollection(message));
-        }
-
-        public MessageIdCollection Post(IEnumerable<string> messages)
-        {
-            return Post(new MessageCollection(messages));
-        }
-
+        
         /// <summary>
         /// This call adds or pushes messages onto the queue.
         /// </summary>
@@ -323,6 +330,7 @@ namespace IronSharp.IronMQ
         /// </summary>
         /// <remarks>
         /// http://dev.iron.io/mq/reference/api/#add_subscribers_to_a_queue
+        /// http://dev.iron.io/mq/reference/push_queues/
         /// </remarks>
         public QueueInfo AddSubscribers(SubscriberCollection subscriberCollection)
         {

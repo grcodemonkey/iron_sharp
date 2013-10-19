@@ -63,7 +63,7 @@ namespace IronSharp.IronCache
         {
             CacheItem item = Get(key);
 
-            if (item == null || string.IsNullOrEmpty(item.Value))
+            if (IsDefaultValue(item))
             {
                 return default(T);
             }
@@ -88,7 +88,7 @@ namespace IronSharp.IronCache
         {
             CacheItem item = Get(key);
 
-            if (item == null || string.IsNullOrEmpty(item.Value))
+            if (IsDefaultValue(item))
             {
                 item = valueFactory();
                 Put(key, item);
@@ -109,9 +109,9 @@ namespace IronSharp.IronCache
         /// <remarks>
         /// http://dev.iron.io/cache/reference/api/#increment_an_items_value
         /// </remarks>
-        public CacheIncrementResult Increment(string key, int amount)
+        public CacheIncrementResult Increment(string key, int amount = 1)
         {
-            return RestClient.Post<CacheIncrementResult>(_client.Config, string.Format("{0}/increment", CacheItemEndPoint(key)), new {amount});
+            return RestClient.Post<CacheIncrementResult>(_client.Config, string.Format("{0}/increment", CacheItemEndPoint(key)), new { amount });
         }
 
         /// <summary>
@@ -128,6 +128,11 @@ namespace IronSharp.IronCache
         public bool Put(string key, object value, CacheItemOptions options = null)
         {
             return Put(key, ValueSerializer.Generate(value), options);
+        }
+
+        public bool Put(string key, int value, CacheItemOptions options = null)
+        {
+            return Put(key, new CacheItem(value, options));
         }
 
         public bool Put(string key, string value, CacheItemOptions options = null)
@@ -148,6 +153,10 @@ namespace IronSharp.IronCache
             return RestClient.Put<ResponseMsg>(_client.Config, CacheItemEndPoint(key), item).HasExpectedMessage("Stored.");
         }
 
+        private static bool IsDefaultValue(CacheItem item)
+        {
+            return item == null || item.Value == null || string.IsNullOrEmpty(Convert.ToString(item.Value));
+        }
         private string CacheItemEndPoint(string key)
         {
             return string.Format("{0}/items/{1}", CacheNameEndPoint(), key);

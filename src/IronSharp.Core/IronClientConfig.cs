@@ -36,6 +36,11 @@ namespace IronSharp.Core
             };
         }
 
+        public static IronClientConfig ReadJson(string ironDotJson)
+        {
+            return JSON.Parse<IronClientConfig>(ironDotJson);
+        }
+
         private static IronSharpConfig CreateDefaultIronSharpConfig()
         {
             return new IronSharpConfig

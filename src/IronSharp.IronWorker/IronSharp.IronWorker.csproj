@@ -52,7 +52,6 @@
     <Compile Include="Code\CodeInfoCollection.cs" />
     <Compile Include="Code\CodeClient.cs" />
     <Compile Include="IronWorkerRestClient.cs" />
-    <Compile Include="IIdCollection.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Code\CodeInfo.cs" />
     <Compile Include="Code\RevisionCollection.cs" />
