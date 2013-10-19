@@ -2,7 +2,7 @@
 
 namespace IronSharp.Core
 {
-    public class IronSharpConfig
+    public class IronSharpConfig: IInspectable
     {
         private IValueSerializer _valueSerializer;
 

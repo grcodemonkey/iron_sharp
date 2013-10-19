@@ -6,8 +6,8 @@ namespace IronSharp.Core
 {
     public class JsonContent : StringContent
     {
-        public JsonContent(IValueSerializer valueSerializer, Object content)
-            : base(valueSerializer.Generate(content))
+        public JsonContent(Object content)
+            : base(JSON.Generate(content))
         {
             Headers.ContentType = new MediaTypeHeaderValue("application/json");
         }

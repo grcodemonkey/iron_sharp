@@ -1,9 +1,10 @@
-﻿using System.Threading;
+﻿using System.Collections.Specialized;
+using System.Threading;
 using Newtonsoft.Json;
 
 namespace IronSharp.Core
 {
-    public class IronClientConfig
+    public class IronClientConfig : IIronSharpConfig, IInspectable
     {
         private IronSharpConfig _sharpConfig;
 
@@ -24,6 +25,15 @@ namespace IronSharp.Core
         {
             get { return LazyInitializer.EnsureInitialized(ref _sharpConfig, CreateDefaultIronSharpConfig); }
             set { _sharpConfig = value; }
+        }
+
+        public static IronClientConfig Read(NameValueCollection settings)
+        {
+            return new IronClientConfig
+            {
+                ProjectId = settings["IronSharp:ProjectId"],
+                Token = settings["IronSharp:Token"]
+            };
         }
 
         private static IronSharpConfig CreateDefaultIronSharpConfig()

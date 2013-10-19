@@ -16,13 +16,20 @@ namespace IronSharp.IronWorker
             return StartingOn(Now + delay);
         }
 
-        public ScheduleOptionsBuilder EndingOn(DateTime endAt)
+        public ScheduleOptionsBuilder StopAt(DateTime endAt)
         {
             EndAt = endAt;
             return this;
         }
 
-        public ScheduleOptionsBuilder Repeat(int times)
+        public ScheduleOptionsBuilder NeverStop()
+        {
+            EndAt = null;
+            RunTimes = null;
+            return this;
+        }
+
+        public ScheduleOptionsBuilder StopAfterNumberOfRuns(int times)
         {
             RunTimes = times;
             return this;
@@ -30,8 +37,9 @@ namespace IronSharp.IronWorker
 
         public ScheduleOptionsBuilder RunFor(TimeSpan duration)
         {
-            return EndingOn(Now + duration);
+            return StopAt(Now + duration);
         }
+
         public ScheduleOptionsBuilder StartingOn(DateTime startAt)
         {
             StartAt = startAt;
@@ -47,11 +55,6 @@ namespace IronSharp.IronWorker
         {
             Priority = priority;
             return this;
-        }
-
-        private static int Multiply(double a, double b)
-        {
-            return Convert.ToInt32(a*b);
         }
     }
 }

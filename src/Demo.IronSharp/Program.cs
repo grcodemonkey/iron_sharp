@@ -1,23 +1,26 @@
 ﻿using System;
+using System.Collections.Specialized;
+using System.Configuration;
 using IronSharp.Core;
 using IronSharp.IronCache;
 using IronSharp.IronMQ;
 using IronSharp.IronWorker;
 
-namespace ConsoleApplication2
+namespace Demo.IronSharpConsole
 {
     internal class Program
     {
         private static void Main(string[] args)
         {
-            string projectId = "INSERT_PROJECT_ID";
-            string token = "TOKEN_GOES_HERE";
+            NameValueCollection appSettings = ConfigurationManager.AppSettings;
+
+            IronClientConfig config = IronClientConfig.Read(appSettings);
 
             // =========================================================
             // Iron.io Cache
             // =========================================================
 
-            IronCacheRestClient ironCacheClient = IronSharp.IronCache.Client.New(projectId, token);
+            IronCacheRestClient ironCacheClient = IronSharp.IronCache.Client.New(config);
 
             // Get a Cache object
             CacheClient cache = ironCacheClient.Cache("my_cache");
@@ -41,7 +44,7 @@ namespace ConsoleApplication2
             // Iron.io MQ
             // =========================================================
 
-            IronMqRestClient ironMq = IronSharp.IronMQ.Client.New(projectId, token);
+            IronMqRestClient ironMq = IronSharp.IronMQ.Client.New(config);
 
             // Get a Queue object
             QueueClient queue = ironMq.Queue("my_queue");
@@ -55,7 +58,7 @@ namespace ConsoleApplication2
             QueueMessage msg = queue.Next();
 
             Console.WriteLine(msg.Inspect());
-            
+
             //# Delete the message
             bool deleted = msg.Delete();
 
@@ -68,29 +71,37 @@ namespace ConsoleApplication2
                 Console.WriteLine(next.Inspect());
                 Console.WriteLine(next.Delete());
             }
-            
+
             // =========================================================
             // Iron.io Worker
             // =========================================================
 
-            IronWorkerRestClient workerClient = IronSharp.IronWorker.Client.New(projectId, token);
+            IronWorkerRestClient workerClient = IronSharp.IronWorker.Client.New(config);
 
-            //string taskId = workerClient.Tasks.Create("Test", new { Key = "Value" });
+            string taskId = workerClient.Tasks.Create("Test", new {Key = "Value"});
 
-            //Console.WriteLine("TaskID: {0}", taskId);
+            Console.WriteLine("TaskID: {0}", taskId);
 
-            //TaskInfoCollection taskInfoCollection = workerClient.Tasks.List("Test");
+            TaskInfoCollection taskInfoCollection = workerClient.Tasks.List("Test");
 
-            //foreach (var task in taskInfoCollection.Tasks)
-            //{
-            //    Console.WriteLine(task.Inspect());
-            //}
+            foreach (TaskInfo task in taskInfoCollection.Tasks)
+            {
+                Console.WriteLine(task.Inspect());
+            }
 
             ScheduleOptions options = ScheduleBuilder.Build().
-                                            Delay(TimeSpan.FromMinutes(1)).
-                                            WithPriority(TaskPriority.High);
+                Delay(TimeSpan.FromMinutes(1)).
+                WithFrequency(TimeSpan.FromHours(1)).
+                RunFor(TimeSpan.FromHours(3)).
+                WithPriority(TaskPriority.Default);
 
-            ScheduleIdCollection schedule= workerClient.Schedules.Create("Test", new[] {1, 2, 3, 4, 5}, options);
+            var payload = new
+            {
+                a = "b",
+                c = new[] {1, 2, 3}
+            };
+
+            ScheduleIdCollection schedule = workerClient.Schedules.Create("Test", payload, options);
 
             Console.WriteLine(schedule.Inspect());
 

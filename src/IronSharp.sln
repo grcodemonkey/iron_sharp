@@ -13,7 +13,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IronSharp.IronCache", "Iron
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IronSharp.Extras.ServiceStackSerializers", "IronSharp.Extras.ServiceStackSerializers\IronSharp.Extras.ServiceStackSerializers.csproj", "{51A944C8-8A3D-4AB6-A475-6B2C204CD823}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleApplication2", "ConsoleApplication2\ConsoleApplication2.csproj", "{313FA8E0-8415-48B6-926D-F00465BD4232}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Demo.IronSharp", "Demo.IronSharp\Demo.IronSharp.csproj", "{4EFB32B2-4CD3-4604-9ADC-458A4FC4C50B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Demos", "Demos", "{01B8724C-95A0-4B03-AE87-1BAAAA3AA2F1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Extras", "Extras", "{C8778C67-3748-47F8-AEAB-B33D8E6B9D55}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -52,14 +56,18 @@ Global
 		{51A944C8-8A3D-4AB6-A475-6B2C204CD823}.Publish|Any CPU.Build.0 = Release|Any CPU
 		{51A944C8-8A3D-4AB6-A475-6B2C204CD823}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{51A944C8-8A3D-4AB6-A475-6B2C204CD823}.Release|Any CPU.Build.0 = Release|Any CPU
-		{313FA8E0-8415-48B6-926D-F00465BD4232}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{313FA8E0-8415-48B6-926D-F00465BD4232}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{313FA8E0-8415-48B6-926D-F00465BD4232}.Publish|Any CPU.ActiveCfg = Release|Any CPU
-		{313FA8E0-8415-48B6-926D-F00465BD4232}.Publish|Any CPU.Build.0 = Release|Any CPU
-		{313FA8E0-8415-48B6-926D-F00465BD4232}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{313FA8E0-8415-48B6-926D-F00465BD4232}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4EFB32B2-4CD3-4604-9ADC-458A4FC4C50B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4EFB32B2-4CD3-4604-9ADC-458A4FC4C50B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4EFB32B2-4CD3-4604-9ADC-458A4FC4C50B}.Publish|Any CPU.ActiveCfg = Release|Any CPU
+		{4EFB32B2-4CD3-4604-9ADC-458A4FC4C50B}.Publish|Any CPU.Build.0 = Release|Any CPU
+		{4EFB32B2-4CD3-4604-9ADC-458A4FC4C50B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4EFB32B2-4CD3-4604-9ADC-458A4FC4C50B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{4EFB32B2-4CD3-4604-9ADC-458A4FC4C50B} = {01B8724C-95A0-4B03-AE87-1BAAAA3AA2F1}
+		{51A944C8-8A3D-4AB6-A475-6B2C204CD823} = {C8778C67-3748-47F8-AEAB-B33D8E6B9D55}
 	EndGlobalSection
 EndGlobal

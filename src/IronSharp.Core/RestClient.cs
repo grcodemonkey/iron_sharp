@@ -6,7 +6,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using System.Web;
-using System.Web.Caching;
+using Common.Logging;
 
 namespace IronSharp.Core
 {
@@ -17,7 +17,7 @@ namespace IronSharp.Core
             return new HttpClient { BaseAddress = baseAddress };
         }
 
-        public static RestResponse<T> Delete<T>(IronClientConfig config, string endPoint, NameValueCollection query = null, Object payload = null) where T : class 
+        public static RestResponse<T> Delete<T>(IronClientConfig config, string endPoint, NameValueCollection query = null, Object payload = null) where T : class
         {
             HttpRequestMessage request = BuildRequest(config, new RestClientRequest
             {
@@ -30,7 +30,7 @@ namespace IronSharp.Core
 
             if (payload != null)
             {
-                request.Content = new JsonContent(sharpConfig.ValueSerializer, payload);
+                request.Content = new JsonContent(payload);
             }
 
             return new RestResponse<T>(AttemptRequest(sharpConfig, request));
@@ -52,7 +52,7 @@ namespace IronSharp.Core
             }
         }
 
-        public static RestResponse<T> Get<T>(IronClientConfig config, string endPoint, NameValueCollection query = null) where T : class 
+        public static RestResponse<T> Get<T>(IronClientConfig config, string endPoint, NameValueCollection query = null) where T : class
         {
             HttpRequestMessage request = BuildRequest(config, new RestClientRequest
             {
@@ -64,7 +64,7 @@ namespace IronSharp.Core
             return new RestResponse<T>(AttemptRequest(config.SharpConfig, request));
         }
 
-        public static RestResponse<T> Post<T>(IronClientConfig config, string endPoint, object payload = null, NameValueCollection query = null) where T : class 
+        public static RestResponse<T> Post<T>(IronClientConfig config, string endPoint, object payload = null, NameValueCollection query = null) where T : class
         {
             HttpRequestMessage request = BuildRequest(config, new RestClientRequest
             {
@@ -77,23 +77,13 @@ namespace IronSharp.Core
 
             if (payload != null)
             {
-                request.Content = new JsonContent(sharpConfig.ValueSerializer, payload);
-            }
-
-            using (var sw = new StringWriter())
-            {
-                sw.WriteLine("Request: {0}", request.RequestUri);
-                if (request.Content != null)
-                {
-                    sw.WriteLine(request.Content.ReadAsStringAsync().Result);
-                }
-                File.AppendAllText("log.txt", sw.ToString());
+                request.Content = new JsonContent(payload);
             }
 
             return new RestResponse<T>(AttemptRequest(sharpConfig, request));
         }
 
-        public static RestResponse<T> Put<T>(IronClientConfig config, string endPoint, object payload, NameValueCollection query = null) where T : class 
+        public static RestResponse<T> Put<T>(IronClientConfig config, string endPoint, object payload, NameValueCollection query = null) where T : class
         {
             HttpRequestMessage request = BuildRequest(config, new RestClientRequest
             {
@@ -106,7 +96,7 @@ namespace IronSharp.Core
 
             if (payload != null)
             {
-                request.Content = new JsonContent(sharpConfig.ValueSerializer, payload);
+                request.Content = new JsonContent(payload);
             }
 
             return new RestResponse<T>(AttemptRequest(sharpConfig, request));
@@ -119,9 +109,32 @@ namespace IronSharp.Core
                 throw new MaximumRetryAttemptsExceededException(request, HttpClientOptions.RetryLimit);
             }
 
+            ILog logger = LogManager.GetLogger<RestClient>();
+
             using (var client = new HttpClient())
             {
+                if (logger.IsDebugEnabled)
+                {
+                    using (var sw = new StringWriter())
+                    {
+                        sw.WriteLine("{0} {1}", request.Method, request.RequestUri);
+                        if (request.Content != null)
+                        {
+                            sw.WriteLine(request.Content.ReadAsStringAsync().Result);
+                        }
+                        logger.Debug(sw.ToString());
+                    }
+                }
+
                 HttpResponseMessage response = client.SendAsync(request).Result;
+
+                if (logger.IsDebugEnabled)
+                {
+                    if (response.Content != null)
+                    {
+                        logger.Debug(response.Content.ReadAsStringAsync().Result);
+                    }
+                }
 
                 if (response.IsSuccessStatusCode)
                 {
