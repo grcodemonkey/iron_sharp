@@ -15,12 +15,12 @@ namespace IronSharp.IronCache
 
             if (string.IsNullOrEmpty(Config.Host))
             {
-                Config.Host = CloudHosts.DEFAULT;
+                Config.Host = IronCacheCloudHosts.DEFAULT;
             }
 
-            if (config.Version == default (int))
+            if (config.ApiVersion == default (int))
             {
-                config.Version = 1;
+                config.ApiVersion = 1;
             }
         }
 

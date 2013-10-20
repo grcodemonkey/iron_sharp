@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using System.Threading;
 using IronSharp.Core;
 
 namespace IronSharp.IronWorker
 {
-   public class IronWorkerRestClient
+    public class IronWorkerRestClient
     {
         private readonly IronClientConfig _config;
 
@@ -18,12 +13,12 @@ namespace IronSharp.IronWorker
 
             if (string.IsNullOrEmpty(Config.Host))
             {
-                Config.Host = CloudHosts.DEFAULT;
+                Config.Host = IronWorkCloudHosts.DEFAULT;
             }
 
-            if (config.Version == default (int))
+            if (config.ApiVersion == default (int))
             {
-                config.Version = 2;
+                config.ApiVersion = 2;
             }
         }
 
@@ -36,8 +31,6 @@ namespace IronSharp.IronWorker
         {
             get { return "/projects/{Project ID}"; }
         }
-
-
 
         #region Code
 

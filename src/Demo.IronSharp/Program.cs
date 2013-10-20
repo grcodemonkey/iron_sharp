@@ -1,6 +1,5 @@
 ﻿using System;
-using System.Collections.Specialized;
-using System.Configuration;
+using System.IO;
 using System.Linq;
 using Common.Logging;
 using Common.Logging.Simple;
@@ -17,15 +16,11 @@ namespace Demo.IronSharpConsole
         {
             LogManager.Adapter = new ConsoleOutLoggerFactoryAdapter();
 
-            NameValueCollection appSettings = ConfigurationManager.AppSettings;
-
-            IronClientConfig config = IronClientConfig.Read(appSettings);
-
             // =========================================================
             // Iron.io Cache
             // =========================================================
 
-            IronCacheRestClient ironCacheClient = IronSharp.IronCache.Client.New(config);
+            IronCacheRestClient ironCacheClient = IronSharp.IronCache.Client.New();
 
             // Get a Cache object
             CacheClient cache = ironCacheClient.Cache("my_cache");
@@ -56,7 +51,7 @@ namespace Demo.IronSharpConsole
             // Iron.io MQ
             // =========================================================
 
-            IronMqRestClient ironMq = IronSharp.IronMQ.Client.New(new IronClientConfig{Host = IronSharp.IronMQ.CloudHosts.RACKSPACE_ORD, ProjectId = config.ProjectId, Token = config.Token});
+            IronMqRestClient ironMq = IronSharp.IronMQ.Client.New();
 
             // Get a Queue object
             QueueClient queue = ironMq.Queue("my_queue");
@@ -96,7 +91,7 @@ namespace Demo.IronSharpConsole
             {
                 message = "hello, my name is Iron.io 3"
             };
-            
+
             MessageIdCollection queuedUp = queue.Post(new[] {payload1, payload2, payload3});
 
             Console.WriteLine(queuedUp.Inspect());
@@ -111,7 +106,7 @@ namespace Demo.IronSharpConsole
             // Iron.io Worker
             // =========================================================
 
-            IronWorkerRestClient workerClient = IronSharp.IronWorker.Client.New(config);
+            IronWorkerRestClient workerClient = IronSharp.IronWorker.Client.New();
 
             string taskId = workerClient.Tasks.Create("Test", new {Key = "Value"});
 

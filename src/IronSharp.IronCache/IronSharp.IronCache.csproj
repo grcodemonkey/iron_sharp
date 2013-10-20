@@ -53,7 +53,7 @@
     <Compile Include="CacheItemOptions.cs" />
     <Compile Include="IronCacheRestClient.cs" />
     <Compile Include="Client.cs" />
-    <Compile Include="CloudHosts.cs" />
+    <Compile Include="IronCacheCloudHosts.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

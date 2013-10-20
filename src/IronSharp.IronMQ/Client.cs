@@ -4,7 +4,12 @@ namespace IronSharp.IronMQ
 {
     public static class Client
     {
-        public static IronMqRestClient @New(string projectId = null, string token = null, string host = null)
+        public static IronMqRestClient @New()
+        {
+            return New(null);
+        }
+
+        public static IronMqRestClient @New(string projectId, string token = null, string host = null)
         {
             return New(new IronClientConfig
             {
@@ -14,9 +19,11 @@ namespace IronSharp.IronMQ
             });
         }
 
-        public static IronMqRestClient @New(IronClientConfig config = null)
+        public static IronMqRestClient @New(IronClientConfig config)
         {
-            return new IronMqRestClient(config);
+            IronClientConfig hierarchyConfig = IronDotConfigManager.Load(IronProduct.IronMQ, config);
+
+            return new IronMqRestClient(hierarchyConfig);
         }
     }
 }

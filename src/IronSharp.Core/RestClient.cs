@@ -193,7 +193,7 @@ namespace IronSharp.Core
 
             var uriBuilder = new UriBuilder(Uri.UriSchemeHttps, config.Host)
             {
-                Path = string.Format("{0}/{1}", config.Version, path.Replace("{Project ID}", config.ProjectId)),
+                Path = string.Format("{0}/{1}", config.ApiVersion, path.Replace("{Project ID}", config.ProjectId)),
                 Query = queryString
             };
 

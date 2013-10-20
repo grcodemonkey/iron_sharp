@@ -1,13 +1,15 @@
-﻿using System;
-using System.Collections.Specialized;
-using System.Threading;
-using IronSharp.Core;
+﻿using IronSharp.Core;
 
 namespace IronSharp.IronCache
 {
     public static class Client
     {
-        public static IronCacheRestClient @New(string projectId = null, string token = null, string host = null)
+        public static IronCacheRestClient @New()
+        {
+            return New(null);
+        }
+
+        public static IronCacheRestClient @New(string projectId, string token = null, string host = null)
         {
             return New(new IronClientConfig
             {
@@ -17,9 +19,11 @@ namespace IronSharp.IronCache
             });
         }
 
-        public static IronCacheRestClient @New(IronClientConfig config = null)
+        public static IronCacheRestClient @New(IronClientConfig config)
         {
-            return new IronCacheRestClient(config);
+            IronClientConfig hierarchyConfig = IronDotConfigManager.Load(IronProduct.IronCache, config);
+
+            return new IronCacheRestClient(hierarchyConfig);
         }
     }
 }

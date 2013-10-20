@@ -1,6 +1,6 @@
 ﻿namespace IronSharp.IronWorker
 {
-    public static class CloudHosts
+    public static class IronWorkCloudHosts
     {
         public const string DEFAULT = AWS_US_EAST_HOST;
 

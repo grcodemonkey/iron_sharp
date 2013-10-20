@@ -3,7 +3,7 @@
     /// <summary>
     /// http://dev.iron.io/mq/reference/clouds/
     /// </summary>
-    public static class CloudHosts
+    public static class IronMqCloudHosts
     {
         public const string DEFAULT = AWS_US_EAST_HOST;
 

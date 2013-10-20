@@ -48,7 +48,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Client.cs" />
-    <Compile Include="CloudHosts.cs" />
+    <Compile Include="IronMqCloudHosts.cs" />
     <Compile Include="IronMqRestClient.cs" />
     <Compile Include="MessageCollection.cs" />
     <Compile Include="MessageIdCollection.cs" />

@@ -48,7 +48,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Client.cs" />
-    <Compile Include="CloudHosts.cs" />
+    <Compile Include="IronWorkCloudHosts.cs" />
     <Compile Include="Code\CodeInfoCollection.cs" />
     <Compile Include="Code\CodeClient.cs" />
     <Compile Include="IronWorkerRestClient.cs" />

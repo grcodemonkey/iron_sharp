@@ -7,7 +7,12 @@ namespace IronSharp.IronWorker
     /// </summary>
     public static class Client
     {
-        public static IronWorkerRestClient @New(string projectId = null, string token = null, string host = null)
+        public static IronWorkerRestClient @New()
+        {
+            return New(null);
+        }
+
+        public static IronWorkerRestClient @New(string projectId, string token = null, string host = null)
         {
             return New(new IronClientConfig
             {
@@ -17,9 +22,11 @@ namespace IronSharp.IronWorker
             });
         }
 
-        public static IronWorkerRestClient @New(IronClientConfig config = null)
+        public static IronWorkerRestClient @New(IronClientConfig config)
         {
-            return new IronWorkerRestClient(config);
+            IronClientConfig hierarchyConfig = IronDotConfigManager.Load(IronProduct.IronWorker, config);
+
+            return new IronWorkerRestClient(hierarchyConfig);
         }
     }
 }

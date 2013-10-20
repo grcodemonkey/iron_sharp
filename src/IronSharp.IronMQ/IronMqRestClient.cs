@@ -14,12 +14,12 @@ namespace IronSharp.IronMQ
 
             if (string.IsNullOrEmpty(Config.Host))
             {
-                Config.Host = CloudHosts.DEFAULT;
+                Config.Host = IronMqCloudHosts.DEFAULT;
             }
 
-            if (config.Version == default (int))
+            if (config.ApiVersion == default (int))
             {
-                config.Version = 1;
+                config.ApiVersion = 1;
             }
         }
 
