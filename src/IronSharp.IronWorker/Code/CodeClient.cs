@@ -1,4 +1,5 @@
-﻿using System.Net.Http;
+﻿using System.IO;
+using System.Net.Http;
 using System.Threading.Tasks;
 using IronSharp.Core;
 
@@ -29,6 +30,26 @@ namespace IronSharp.IronWorker
         public bool Delete()
         {
             return RestClient.Delete<ResponseMsg>(_client.Config, EndPoint).HasExpectedMessage("Deleted");
+        }
+
+        /// <summary>
+        /// Upload a Code Package
+        /// </summary>
+        /// <remarks>
+        /// http://dev.iron.io/worker/reference/api/#upload_or_update_a_code_package
+        /// </remarks>
+        public Task<HttpResponseMessage> Upload(Stream zipFile, WorkerOptions options)
+        {
+            return RestClient.Execute(_client.Config, new RestClientRequest
+            {
+                EndPoint = EndPoint,
+                Method = HttpMethod.Post,
+                Content = new MultipartFormDataContent
+                {
+                    new JsonContent(options),
+                    new StreamContent(zipFile)
+                }
+            });
         }
 
         /// <summary>
