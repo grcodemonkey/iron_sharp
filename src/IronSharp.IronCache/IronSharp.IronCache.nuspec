@@ -6,13 +6,11 @@
     <title>$title$</title>
     <authors>$author$</authors>
     <owners>$author$</owners>
-    <licenseUrl>http://LICENSE_URL_HERE_OR_DELETE_THIS_LINE</licenseUrl>
-    <projectUrl>http://PROJECT_URL_HERE_OR_DELETE_THIS_LINE</projectUrl>
-    <iconUrl>http://ICON_URL_HERE_OR_DELETE_THIS_LINE</iconUrl>
+    <projectUrl>http://grcodemonkey.github.io/iron_sharp/</projectUrl>
+    <iconUrl>http://c577730.r99.cf2.rackcdn.com/images/FeSharp_Icon.png</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
-    <releaseNotes>Summary of changes made in this release of the package.</releaseNotes>
-    <copyright>Copyright 2013</copyright>
-    <tags>Tag1 Tag2</tags>
+    <releaseNotes></releaseNotes>
+    <tags>iron.io</tags>
   </metadata>
 </package>

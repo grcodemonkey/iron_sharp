@@ -47,6 +47,9 @@
     <Reference Include="System.Net.Http" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="$(SolutionDir)/SolutionInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="Client.cs" />
     <Compile Include="IronWorkCloudHosts.cs" />
     <Compile Include="Code\CodeInfoCollection.cs" />

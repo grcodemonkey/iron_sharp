@@ -46,6 +46,9 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="$(SolutionDir)/SolutionInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="CacheClient.cs" />
     <Compile Include="CacheIncrementResult.cs" />
     <Compile Include="CacheInfo.cs" />
