@@ -1,0 +1,195 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Iron sharp by grcodemonkey</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <script src="javascripts/scale.fix.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1 class="header">Iron sharp</h1>
+        <p class="header">IronSharp is a .NET client for Iron.io</p>
+
+        <ul>
+          <li class="download"><a class="buttons" href="https://github.com/grcodemonkey/iron_sharp/zipball/master">Download ZIP</a></li>
+          <li class="download"><a class="buttons" href="https://github.com/grcodemonkey/iron_sharp/tarball/master">Download TAR</a></li>
+          <li><a class="buttons github" href="https://github.com/grcodemonkey/iron_sharp">View On GitHub</a></li>
+        </ul>
+
+        <p class="header">This project is maintained by <a class="header name" href="https://github.com/grcodemonkey">grcodemonkey</a></p>
+
+
+      </header>
+      <section>
+        <h1>
+<a name="" class="anchor" href="#"><span class="octicon octicon-link"></span></a><img src="http://c577730.r99.cf2.rackcdn.com/images/FeSharp.png" alt="Fe#">
+</h1>
+
+<h1>
+<a name="ironsharp-is-a-net-client-for-ironio" class="anchor" href="#ironsharp-is-a-net-client-for-ironio"><span class="octicon octicon-link"></span></a>IronSharp is a .NET client for <a href="http://www.iron.io/">Iron.io</a>
+</h1>
+
+<h2>
+<a name="getting-started" class="anchor" href="#getting-started"><span class="octicon octicon-link"></span></a>Getting Started</h2>
+
+<ol>
+<li>Sign up at <a href="https://hud.iron.io/users/new">https://hud.iron.io/users/new</a>
+</li>
+<li>Get your credentials from <a href="https://hud.iron.io/dashboard">https://hud.iron.io/dashboard</a>
+</li>
+</ol><h2>
+<a name="ironcache" class="anchor" href="#ironcache"><span class="octicon octicon-link"></span></a>IronCache</h2>
+
+<p><a href="http://dev.iron.io/cache/">http://dev.iron.io/cache/</a></p>
+
+<div class="highlight highlight-C#"><pre><span class="c1">// =========================================================</span>
+<span class="c1">// Iron.io Cache</span>
+<span class="c1">// =========================================================</span>
+
+<span class="n">IronCacheRestClient</span> <span class="n">ironCacheClient</span> <span class="p">=</span> <span class="n">IronSharp</span><span class="p">.</span><span class="n">IronCache</span><span class="p">.</span><span class="n">Client</span><span class="p">.</span><span class="n">New</span><span class="p">();</span>
+
+<span class="c1">// Get a Cache object</span>
+<span class="n">CacheClient</span> <span class="n">cache</span> <span class="p">=</span> <span class="n">ironCacheClient</span><span class="p">.</span><span class="n">Cache</span><span class="p">(</span><span class="s">"my_cache"</span><span class="p">);</span>
+
+<span class="c1">// Put value to cache by key</span>
+<span class="n">cache</span><span class="p">.</span><span class="n">Put</span><span class="p">(</span><span class="s">"number_item"</span><span class="p">,</span> <span class="m">42</span><span class="p">);</span>
+
+<span class="c1">// Get value from cache by key</span>
+<span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="n">cache</span><span class="p">.</span><span class="n">Get</span><span class="p">(</span><span class="s">"number_item"</span><span class="p">).</span><span class="n">Value</span><span class="p">);</span>
+
+<span class="c1">// Get value from cache by key</span>
+<span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="n">cache</span><span class="p">.</span><span class="n">Get</span><span class="p">&lt;</span><span class="kt">int</span><span class="p">&gt;(</span><span class="s">"number_item"</span><span class="p">));</span>
+
+<span class="c1">// Numbers can be incremented</span>
+<span class="n">cache</span><span class="p">.</span><span class="n">Increment</span><span class="p">(</span><span class="s">"number_item"</span><span class="p">,</span> <span class="m">10</span><span class="p">);</span>
+
+<span class="c1">// Immediately delete an item</span>
+<span class="n">cache</span><span class="p">.</span><span class="n">Delete</span><span class="p">(</span><span class="s">"number_item"</span><span class="p">);</span>
+
+<span class="n">cache</span><span class="p">.</span><span class="n">Put</span><span class="p">(</span><span class="s">"complex_item"</span><span class="p">,</span> <span class="k">new</span> <span class="p">{</span><span class="n">greeting</span> <span class="p">=</span> <span class="s">"Hello"</span><span class="p">,</span> <span class="n">target</span> <span class="p">=</span> <span class="s">"world"</span><span class="p">});</span>
+
+<span class="c1">// Get value from cache by key</span>
+<span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="n">cache</span><span class="p">.</span><span class="n">Get</span><span class="p">(</span><span class="s">"complex_item"</span><span class="p">).</span><span class="n">Value</span><span class="p">);</span>
+
+<span class="n">cache</span><span class="p">.</span><span class="n">Delete</span><span class="p">(</span><span class="s">"complex_item"</span><span class="p">);</span>
+</pre></div>
+
+<h2>
+<a name="ironmq" class="anchor" href="#ironmq"><span class="octicon octicon-link"></span></a>IronMQ</h2>
+
+<p><a href="http://dev.iron.io/mq/">http://dev.iron.io/mq/</a></p>
+
+<div class="highlight highlight-C#"><pre><span class="c1">// =========================================================</span>
+<span class="c1">// Iron.io MQ</span>
+<span class="c1">// =========================================================</span>
+
+<span class="n">IronMqRestClient</span> <span class="n">ironMq</span> <span class="p">=</span> <span class="n">IronSharp</span><span class="p">.</span><span class="n">IronMQ</span><span class="p">.</span><span class="n">Client</span><span class="p">.</span><span class="n">New</span><span class="p">();</span>
+
+<span class="c1">// Get a Queue object</span>
+<span class="n">QueueClient</span> <span class="n">queue</span> <span class="p">=</span> <span class="n">ironMq</span><span class="p">.</span><span class="n">Queue</span><span class="p">(</span><span class="s">"my_queue"</span><span class="p">);</span>
+
+<span class="n">QueueInfo</span> <span class="n">info</span> <span class="p">=</span> <span class="n">queue</span><span class="p">.</span><span class="n">Info</span><span class="p">();</span>
+
+<span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="n">info</span><span class="p">.</span><span class="n">Inspect</span><span class="p">());</span>
+
+<span class="c1">// Put a message on the queue</span>
+<span class="kt">string</span> <span class="n">messageId</span> <span class="p">=</span> <span class="n">@queue</span><span class="p">.</span><span class="n">Post</span><span class="p">(</span><span class="s">"hello world!"</span><span class="p">);</span>
+
+<span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="n">messageId</span><span class="p">);</span>
+
+<span class="c1">// Get a message</span>
+<span class="n">QueueMessage</span> <span class="n">msg</span> <span class="p">=</span> <span class="n">queue</span><span class="p">.</span><span class="n">Next</span><span class="p">();</span>
+
+<span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="n">msg</span><span class="p">.</span><span class="n">Inspect</span><span class="p">());</span>
+
+<span class="c1">//# Delete the message</span>
+<span class="kt">bool</span> <span class="n">deleted</span> <span class="p">=</span> <span class="n">msg</span><span class="p">.</span><span class="n">Delete</span><span class="p">();</span>
+
+<span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="s">"Deleted = {0}"</span><span class="p">,</span> <span class="n">deleted</span><span class="p">);</span>
+
+<span class="kt">var</span> <span class="n">payload1</span> <span class="p">=</span> <span class="k">new</span>
+<span class="p">{</span>
+    <span class="n">message</span> <span class="p">=</span> <span class="s">"hello, my name is Iron.io 1"</span>
+<span class="p">};</span>
+
+<span class="kt">var</span> <span class="n">payload2</span> <span class="p">=</span> <span class="k">new</span>
+<span class="p">{</span>
+    <span class="n">message</span> <span class="p">=</span> <span class="s">"hello, my name is Iron.io 2"</span>
+<span class="p">};</span>
+
+<span class="kt">var</span> <span class="n">payload3</span> <span class="p">=</span> <span class="k">new</span>
+<span class="p">{</span>
+    <span class="n">message</span> <span class="p">=</span> <span class="s">"hello, my name is Iron.io 3"</span>
+<span class="p">};</span>
+
+<span class="n">MessageIdCollection</span> <span class="n">queuedUp</span> <span class="p">=</span> <span class="n">queue</span><span class="p">.</span><span class="n">Post</span><span class="p">(</span><span class="k">new</span><span class="p">[]</span> <span class="p">{</span><span class="n">payload1</span><span class="p">,</span> <span class="n">payload2</span><span class="p">,</span> <span class="n">payload3</span><span class="p">});</span>
+
+<span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="n">queuedUp</span><span class="p">.</span><span class="n">Inspect</span><span class="p">());</span>
+
+<span class="n">QueueMessage</span> <span class="n">next</span><span class="p">;</span>
+
+<span class="k">while</span> <span class="p">(</span><span class="n">queue</span><span class="p">.</span><span class="n">Read</span><span class="p">(</span><span class="k">out</span> <span class="n">next</span><span class="p">))</span>
+<span class="p">{</span>
+    <span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="n">next</span><span class="p">.</span><span class="n">Inspect</span><span class="p">());</span>
+    <span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="n">next</span><span class="p">.</span><span class="n">Delete</span><span class="p">());</span>
+<span class="p">}</span>
+</pre></div>
+
+<h2>
+<a name="ironworker" class="anchor" href="#ironworker"><span class="octicon octicon-link"></span></a>IronWorker</h2>
+
+<p><a href="http://dev.iron.io/worker/">http://dev.iron.io/worker/</a></p>
+
+<div class="highlight highlight-C#"><pre><span class="c1">// =========================================================</span>
+<span class="c1">// Iron.io Worker</span>
+<span class="c1">// =========================================================</span>
+
+<span class="n">IronWorkerRestClient</span> <span class="n">workerClient</span> <span class="p">=</span> <span class="n">IronSharp</span><span class="p">.</span><span class="n">IronWorker</span><span class="p">.</span><span class="n">Client</span><span class="p">.</span><span class="n">New</span><span class="p">();</span>
+
+<span class="kt">string</span> <span class="n">taskId</span> <span class="p">=</span> <span class="n">workerClient</span><span class="p">.</span><span class="n">Tasks</span><span class="p">.</span><span class="n">Create</span><span class="p">(</span><span class="s">"Test"</span><span class="p">,</span> <span class="k">new</span> <span class="p">{</span><span class="n">Key</span> <span class="p">=</span> <span class="s">"Value"</span><span class="p">});</span>
+
+<span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="s">"TaskID: {0}"</span><span class="p">,</span> <span class="n">taskId</span><span class="p">);</span>
+
+<span class="n">TaskInfoCollection</span> <span class="n">taskInfoCollection</span> <span class="p">=</span> <span class="n">workerClient</span><span class="p">.</span><span class="n">Tasks</span><span class="p">.</span><span class="n">List</span><span class="p">(</span><span class="s">"Test"</span><span class="p">);</span>
+
+<span class="k">foreach</span> <span class="p">(</span><span class="n">TaskInfo</span> <span class="n">task</span> <span class="k">in</span> <span class="n">taskInfoCollection</span><span class="p">.</span><span class="n">Tasks</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="n">task</span><span class="p">.</span><span class="n">Inspect</span><span class="p">());</span>
+<span class="p">}</span>
+
+<span class="n">ScheduleOptions</span> <span class="n">options</span> <span class="p">=</span> <span class="n">ScheduleBuilder</span><span class="p">.</span><span class="n">Build</span><span class="p">().</span>
+    <span class="n">Delay</span><span class="p">(</span><span class="n">TimeSpan</span><span class="p">.</span><span class="n">FromMinutes</span><span class="p">(</span><span class="m">1</span><span class="p">)).</span>
+    <span class="n">WithFrequency</span><span class="p">(</span><span class="n">TimeSpan</span><span class="p">.</span><span class="n">FromHours</span><span class="p">(</span><span class="m">1</span><span class="p">)).</span>
+    <span class="n">RunFor</span><span class="p">(</span><span class="n">TimeSpan</span><span class="p">.</span><span class="n">FromHours</span><span class="p">(</span><span class="m">3</span><span class="p">)).</span>
+    <span class="n">WithPriority</span><span class="p">(</span><span class="n">TaskPriority</span><span class="p">.</span><span class="n">Default</span><span class="p">);</span>
+
+<span class="kt">var</span> <span class="n">payload</span> <span class="p">=</span> <span class="k">new</span>
+<span class="p">{</span>
+    <span class="n">a</span> <span class="p">=</span> <span class="s">"b"</span><span class="p">,</span>
+    <span class="n">c</span> <span class="p">=</span> <span class="k">new</span><span class="p">[]</span> <span class="p">{</span><span class="m">1</span><span class="p">,</span> <span class="m">2</span><span class="p">,</span> <span class="m">3</span><span class="p">}</span>
+<span class="p">};</span>
+
+<span class="n">ScheduleIdCollection</span> <span class="n">schedule</span> <span class="p">=</span> <span class="n">workerClient</span><span class="p">.</span><span class="n">Schedules</span><span class="p">.</span><span class="n">Create</span><span class="p">(</span><span class="s">"Test"</span><span class="p">,</span> <span class="n">payload</span><span class="p">,</span> <span class="n">options</span><span class="p">);</span>
+
+<span class="n">Console</span><span class="p">.</span><span class="n">WriteLine</span><span class="p">(</span><span class="n">schedule</span><span class="p">.</span><span class="n">Inspect</span><span class="p">());</span>
+
+<span class="n">workerClient</span><span class="p">.</span><span class="n">Schedules</span><span class="p">.</span><span class="n">Cancel</span><span class="p">(</span><span class="n">schedule</span><span class="p">.</span><span class="n">Schedules</span><span class="p">.</span><span class="n">First</span><span class="p">().</span><span class="n">Id</span><span class="p">);</span>
+</pre></div>
+      </section>
+      <footer>
+        <p><small>Hosted on <a href="https://pages.github.com">GitHub Pages</a> using the Dinky theme</small></p>
+      </footer>
+    </div>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+		
+  </body>
+</html>
