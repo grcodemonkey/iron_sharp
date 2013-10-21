@@ -31,7 +31,7 @@ namespace IronSharp.IronWorker
                 Tasks.Add(new TaskPayload(codeName, payload, options));
             }
         }
-        
+
         [JsonProperty("tasks")]
         public List<TaskPayload> Tasks
         {

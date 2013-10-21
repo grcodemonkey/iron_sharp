@@ -49,7 +49,7 @@ namespace IronSharp.IronCache
         {
             if (Value is T)
             {
-                return (T)Value;
+                return (T) Value;
             }
 
             return Client.ValueSerializer.Parse<T>(Convert.ToString(Value));

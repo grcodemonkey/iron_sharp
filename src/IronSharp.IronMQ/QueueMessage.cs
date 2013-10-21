@@ -1,5 +1,4 @@
-﻿using IronSharp.Core;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 
 namespace IronSharp.IronMQ
 {
@@ -28,16 +27,16 @@ namespace IronSharp.IronMQ
         /// </summary>
         [JsonProperty("body")]
         public string Body { get; set; }
-        
+
         [JsonProperty("id")]
         public string Id { get; set; }
-        
+
         [JsonProperty("push_status", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public PushStatus PushStatus { get; set; }
 
         [JsonProperty("reserved_count", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public int? ReservedCount { get; set; }
-        
+
         #endregion
 
         #region Methods
@@ -53,7 +52,7 @@ namespace IronSharp.IronMQ
         /// <summary>
         /// Releases this message and puts it back on the queue as if the message had timed out.
         /// </summary>
-        /// <returns></returns>
+        /// <returns> </returns>
         public bool Release(int? delay = null)
         {
             return Client.Release(Id, delay);
@@ -71,7 +70,7 @@ namespace IronSharp.IronMQ
 
         [JsonIgnore]
         internal QueueClient Client { get; set; }
-        
+
         public static implicit operator QueueMessage(string message)
         {
             return new QueueMessage(message);

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace IronSharp.Core
+﻿namespace IronSharp.Core
 {
     public interface IValueSerializer
     {

@@ -11,7 +11,7 @@ namespace IronSharp.IronWorker
         /// <summary>
         /// Creates a schedule builder instance
         /// </summary>
-        /// <param name="now">The current date and time relative the timezone setting under the account in the HUD on Iron.io (defaults to current local time)</param>
+        /// <param name="now"> The current date and time relative the timezone setting under the account in the HUD on Iron.io (defaults to current local time) </param>
         public static ScheduleOptionsBuilder Build(DateTime? now = null)
         {
             return new ScheduleOptionsBuilder(now.GetValueOrDefault(DateTime.Now));

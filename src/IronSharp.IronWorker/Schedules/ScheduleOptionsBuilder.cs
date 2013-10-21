@@ -45,6 +45,7 @@ namespace IronSharp.IronWorker
             StartAt = startAt;
             return this;
         }
+
         public ScheduleOptionsBuilder WithFrequency(TimeSpan frequency)
         {
             RunEvery = frequency.Seconds;

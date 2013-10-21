@@ -14,7 +14,7 @@ namespace IronSharp.Core
     {
         public static HttpClient Create(Uri baseAddress, string authenticationToken)
         {
-            return new HttpClient { BaseAddress = baseAddress };
+            return new HttpClient {BaseAddress = baseAddress};
         }
 
         public static RestResponse<T> Delete<T>(IronClientConfig config, string endPoint, NameValueCollection query = null, Object payload = null) where T : class

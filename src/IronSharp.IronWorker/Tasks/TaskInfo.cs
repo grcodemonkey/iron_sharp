@@ -39,13 +39,19 @@ namespace IronSharp.IronWorker
         [JsonProperty("start_time", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public DateTime? StartTime { get; set; }
 
-        [JsonProperty("status", DefaultValueHandling = DefaultValueHandling.Ignore)]
-        public string Status { get; set; }
+        [JsonIgnore]
+        public TaskStates Status {
+            get { return StatusValue.As<TaskStates>(); }
+            set { StatusValue = Convert.ToString(value).ToLower(); }
+        }
 
         [JsonProperty("timeout", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public int? Timeout { get; set; }
 
         [JsonProperty("updated_at", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public DateTime? UpdatedAt { get; set; }
+
+        [JsonProperty("status", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        protected string StatusValue { get; set; }
     }
 }

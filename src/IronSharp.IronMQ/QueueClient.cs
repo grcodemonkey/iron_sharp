@@ -106,7 +106,8 @@ namespace IronSharp.IronMQ
         /// </remarks>
         public bool Delete(IEnumerable<string> messageIds)
         {
-            return RestClient.Delete<ResponseMsg>(_client.Config, string.Format("{0}/messages", EndPoint), payload: new MessageIdCollection(messageIds)).HasExpectedMessage("Deleted");
+            return
+                RestClient.Delete<ResponseMsg>(_client.Config, string.Format("{0}/messages", EndPoint), payload: new MessageIdCollection(messageIds)).HasExpectedMessage("Deleted");
         }
 
         /// <summary>
@@ -251,7 +252,7 @@ namespace IronSharp.IronMQ
         {
             return Post(new MessageCollection(messages));
         }
-        
+
         /// <summary>
         /// This call adds or pushes messages onto the queue.
         /// </summary>
@@ -321,6 +322,7 @@ namespace IronSharp.IronMQ
 
             return messageCollection;
         }
+
         #endregion
 
         #region Subscribers
@@ -374,6 +376,7 @@ namespace IronSharp.IronMQ
         {
             return RestClient.Delete<QueueInfo>(_client.Config, string.Format("{0}/subscribers", EndPoint), payload: subscriberCollection);
         }
+
         #endregion
     }
 }

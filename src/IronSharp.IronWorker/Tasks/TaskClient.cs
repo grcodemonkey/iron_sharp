@@ -44,10 +44,10 @@ namespace IronSharp.IronWorker
         /// <summary>
         /// Creates a single task
         /// </summary>
-        /// <param name="codeName">The task Code Name</param>
-        /// <param name="payload">The task payload</param>
-        /// <param name="options">The task options</param>
-        /// <returns>The task id</returns>
+        /// <param name="codeName"> The task Code Name </param>
+        /// <param name="payload"> The task payload </param>
+        /// <param name="options"> The task options </param>
+        /// <returns> The task id </returns>
         public string Create(string codeName, object payload, TaskOptions options = null)
         {
             return Create(codeName, ValueSerializer.Generate(payload), options);
@@ -56,10 +56,10 @@ namespace IronSharp.IronWorker
         /// <summary>
         /// Creates a single task
         /// </summary>
-        /// <param name="codeName">The task Code Name</param>
-        /// <param name="payload">The task payload</param>
-        /// <param name="options">The task options</param>
-        /// <returns>The task id</returns>
+        /// <param name="codeName"> The task Code Name </param>
+        /// <param name="payload"> The task payload </param>
+        /// <param name="options"> The task options </param>
+        /// <returns> The task id </returns>
         public string Create(string codeName, string payload, TaskOptions options = null)
         {
             return Create(new TaskPayload(codeName, payload, options));
@@ -68,8 +68,8 @@ namespace IronSharp.IronWorker
         /// <summary>
         /// Creates a single task
         /// </summary>
-        /// <param name="payload">The task payload</param>
-        /// <returns>The task id</returns>
+        /// <param name="payload"> The task payload </param>
+        /// <returns> The task id </returns>
         public string Create(TaskPayload payload)
         {
             TaskIdCollection result = Create(new TaskPayloadCollection(payload));
@@ -124,7 +124,7 @@ namespace IronSharp.IronWorker
         /// <summary>
         /// </summary>
         /// <param name="codeName"> The name of your worker (code package). </param>
-        /// <param name="filter"> List filtering options </param>
+        /// <param name="filter"> List filtering options, to filter by Status use Status = TaskStates.Running | TaskStates.Queued to get all Running or Queued tasks </param>
         /// <remarks>
         /// http://dev.iron.io/worker/reference/api/#list_tasks
         /// </remarks>

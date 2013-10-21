@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Diagnostics.Contracts;
-using System.Net.Http;
 using IronSharp.Core;
 
 namespace IronSharp.IronWorker
@@ -24,11 +23,9 @@ namespace IronSharp.IronWorker
 
         public IValueSerializer ValueSerializer
         {
-            get
-            {
-                return _client.Config.SharpConfig.ValueSerializer;
-            }
+            get { return _client.Config.SharpConfig.ValueSerializer; }
         }
+
         public bool Cancel(string scheduleId)
         {
             return RestClient.Post<ResponseMsg>(_client.Config, ScheduleEndPoint(scheduleId) + "/cancel").HasExpectedMessage("Cancelled");

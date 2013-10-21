@@ -13,10 +13,7 @@ namespace IronSharp.IronWorker
         [JsonIgnore]
         public bool IsEmpty
         {
-            get
-            {
-                return _tasks == null || _tasks.Count == 0;
-            }
+            get { return _tasks == null || _tasks.Count == 0; }
         }
 
         [JsonProperty("tasks")]

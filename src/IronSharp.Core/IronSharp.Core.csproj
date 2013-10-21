@@ -42,7 +42,6 @@
     <Reference Include="Common.Logging">
       <HintPath>..\packages\Common.Logging.2.1.2\lib\net40\Common.Logging.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.CSharp" />
     <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.5.0.7\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
@@ -58,37 +57,38 @@
     <Compile Include="DateTimeHelpers.cs" />
     <Compile Include="DefaultValueSerializer.cs" />
     <Compile Include="ExponentialBackoff.cs" />
-    <Compile Include="ExtensionsForDictionary.cs" />
-    <Compile Include="ExtensionsForIInspectable.cs" />
-    <Compile Include="ExtensionsForIMsg.cs" />
-    <Compile Include="ExtensionsForString.cs" />
-    <Compile Include="IIdCollection.cs" />
-    <Compile Include="IInspectable.cs" />
-    <Compile Include="IIronSharpConfig.cs" />
-    <Compile Include="IMsg.cs" />
-    <Compile Include="IPagingFilter.cs" />
-    <Compile Include="IRestClientRequest.cs" />
-    <Compile Include="IronClientConfig.cs" />
-    <Compile Include="IronDotConfigManager.cs" />
-    <Compile Include="IronProduct.cs" />
-    <Compile Include="IronSharpConfig.cs" />
-    <Compile Include="IronSharpException.cs" />
-    <Compile Include="IValueSerializer.cs" />
+    <Compile Include="Extensions\ExtensionsForDictionary.cs" />
+    <Compile Include="Extensions\ExtensionsForIInspectable.cs" />
+    <Compile Include="Extensions\ExtensionsForIMsg.cs" />
+    <Compile Include="Extensions\ExtensionsForString.cs" />
+    <Compile Include="Abstract\IIdCollection.cs" />
+    <Compile Include="Abstract\IInspectable.cs" />
+    <Compile Include="Abstract\IIronSharpConfig.cs" />
+    <Compile Include="Abstract\IMsg.cs" />
+    <Compile Include="Abstract\IPagingFilter.cs" />
+    <Compile Include="Abstract\IRestClientRequest.cs" />
+    <Compile Include="Config\IronClientConfig.cs" />
+    <Compile Include="Config\IronDotConfigManager.cs" />
+    <Compile Include="Constants\IronProduct.cs" />
+    <Compile Include="Config\IronSharpConfig.cs" />
+    <Compile Include="Exceptions\IronSharpException.cs" />
+    <Compile Include="Abstract\IValueSerializer.cs" />
     <Compile Include="JsonContent.cs" />
     <Compile Include="JSON.cs" />
-    <Compile Include="MaximumRetryAttemptsExceededException.cs" />
-    <Compile Include="PagingFilter.cs" />
+    <Compile Include="Exceptions\MaximumRetryAttemptsExceededException.cs" />
+    <Compile Include="Types\PagingFilter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="HttpClientOptions.cs" />
-    <Compile Include="ResponseMsg.cs" />
+    <Compile Include="Config\HttpClientOptions.cs" />
+    <Compile Include="Types\ResponseMsg.cs" />
     <Compile Include="RestClient.cs" />
-    <Compile Include="RestClientRequest.cs" />
-    <Compile Include="RestResponse.cs" />
-    <Compile Include="RestResponseException.cs" />
+    <Compile Include="Types\RestClientRequest.cs" />
+    <Compile Include="Types\RestResponse.cs" />
+    <Compile Include="Exceptions\RestResponseException.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

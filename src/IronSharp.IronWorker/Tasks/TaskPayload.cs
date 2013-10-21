@@ -1,5 +1,4 @@
 ﻿using System;
-using IronSharp.Core;
 using Newtonsoft.Json;
 
 namespace IronSharp.IronWorker
@@ -47,8 +46,8 @@ namespace IronSharp.IronWorker
         public string Payload { get; set; }
 
         /// <summary>
-        /// The amount of time, in seconds, between runs. 
-        /// By default, the task will only run once. 
+        /// The amount of time, in seconds, between runs.
+        /// By default, the task will only run once.
         /// run_every will return a 400 error if it is set to less than 60.
         /// </summary>
         [JsonProperty("run_every", DefaultValueHandling = DefaultValueHandling.Ignore)]

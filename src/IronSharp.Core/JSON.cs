@@ -14,16 +14,6 @@ namespace IronSharp.Core
             set { _settings = value; }
         }
 
-        private static JsonSerializerSettings GetDefaultSerializerSettings()
-        {
-            return new JsonSerializerSettings
-            {
-                DefaultValueHandling = DefaultValueHandling.Ignore,
-                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
-                DateFormatHandling = DateFormatHandling.IsoDateFormat
-            };
-        }
-
         public static string Generate(object value, JsonSerializerSettings opts = null)
         {
             return Generate(value, null, opts);
@@ -36,12 +26,27 @@ namespace IronSharp.Core
 
         public static T Parse<T>(string value, JsonSerializerSettings opts = null)
         {
-            if (value is T)
-            {
-                return (T) Convert.ChangeType(value, typeof (T));
-            }
+            return (T) DeserializeObject(value, typeof (T), opts);
+        }
 
-            return JsonConvert.DeserializeObject<T>(value, opts ?? Settings);
+        private static object DeserializeObject(string value, Type type, JsonSerializerSettings opts)
+        {
+            // If the target type is already string, then there is no need to Deserialize the value.
+            if (type == typeof (string))
+            {
+                return value;
+            }
+            return JsonConvert.DeserializeObject(value, type, opts ?? Settings);
+        }
+
+        private static JsonSerializerSettings GetDefaultSerializerSettings()
+        {
+            return new JsonSerializerSettings
+            {
+                DefaultValueHandling = DefaultValueHandling.Ignore,
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                DateFormatHandling = DateFormatHandling.IsoDateFormat
+            };
         }
     }
 }

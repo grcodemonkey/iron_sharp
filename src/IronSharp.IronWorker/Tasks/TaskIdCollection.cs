@@ -10,9 +10,6 @@ namespace IronSharp.IronWorker
     {
         private List<TaskId> _tasks;
 
-        [JsonProperty("msg", DefaultValueHandling = DefaultValueHandling.Ignore)]
-        public string Message { get; set; }
-
         [JsonIgnore]
         public bool Success
         {
@@ -26,17 +23,20 @@ namespace IronSharp.IronWorker
             set { _tasks = value; }
         }
 
-        public static implicit operator bool(TaskIdCollection collection)
-        {
-            return collection.Success;
-        }
-
         /// <summary>
         /// Returns a list of IDs
         /// </summary>
         public IEnumerable<string> GetIds()
         {
-            return Tasks.Select(x=> x.Id);
+            return Tasks.Select(x => x.Id);
+        }
+
+        [JsonProperty("msg", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public string Message { get; set; }
+
+        public static implicit operator bool(TaskIdCollection collection)
+        {
+            return collection.Success;
         }
     }
 }

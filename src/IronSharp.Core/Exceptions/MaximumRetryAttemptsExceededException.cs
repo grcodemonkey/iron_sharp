@@ -1,5 +1,4 @@
-﻿using System;
-using System.Net.Http;
+﻿using System.Net.Http;
 
 namespace IronSharp.Core
 {
@@ -7,7 +6,8 @@ namespace IronSharp.Core
     {
         private readonly HttpRequestMessage _request;
 
-        public MaximumRetryAttemptsExceededException(HttpRequestMessage request, int maxAttempts) : base (string.Format("The maximum number of retry attempts ({0}) has been exceeded.", maxAttempts))
+        public MaximumRetryAttemptsExceededException(HttpRequestMessage request, int maxAttempts)
+            : base(string.Format("The maximum number of retry attempts ({0}) has been exceeded.", maxAttempts))
         {
             _request = request;
         }

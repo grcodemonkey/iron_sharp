@@ -27,9 +27,6 @@ namespace IronSharp.IronWorker
         [JsonProperty("last_run_time", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public DateTime? LastRunTime { get; set; }
 
-        [JsonProperty("msg", DefaultValueHandling = DefaultValueHandling.Ignore)]
-        public string Message { get; set; }
-
         [JsonProperty("next_start", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public DateTime? NextStart { get; set; }
 
@@ -38,11 +35,14 @@ namespace IronSharp.IronWorker
 
         [JsonProperty("run_count", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public int? RunCount { get; set; }
-        
+
         [JsonProperty("status", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public string Status { get; set; }
 
         [JsonProperty("updated_at", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public DateTime? UpdatedAt { get; set; }
+
+        [JsonProperty("msg", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public string Message { get; set; }
     }
 }

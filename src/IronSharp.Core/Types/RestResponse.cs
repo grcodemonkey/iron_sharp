@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace IronSharp.Core
 {
-    public class RestResponse<T> : IMsg where T: class 
+    public class RestResponse<T> : IMsg where T : class
     {
         private T _result;
 

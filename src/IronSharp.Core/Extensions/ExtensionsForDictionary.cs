@@ -27,7 +27,7 @@ namespace IronSharp.Core
             {
                 return default(TValue);
             }
-            return (TValue)dictionary[key];
+            return (TValue) dictionary[key];
         }
 
         public static TValue Get<TValue>(this IDictionary<string, object> dictionary, string key, TValue defaultValue = default(TValue))
@@ -38,14 +38,14 @@ namespace IronSharp.Core
             {
                 try
                 {
-                    return (TValue)value;
+                    return (TValue) value;
                 }
                 catch (InvalidCastException)
                 {
                     return Convert.ToString(value).As<TValue>();
                 }
             }
-			return defaultValue;
+            return defaultValue;
         }
 
         public static TValue GetOrAdd<TValue>(this IDictionary dictionary, object key, Func<object, TValue> valueFactory)
@@ -53,13 +53,13 @@ namespace IronSharp.Core
             Contract.Requires(dictionary != null);
             if (dictionary.Contains(key))
             {
-                return (TValue)dictionary[key];
+                return (TValue) dictionary[key];
             }
             TValue instance = valueFactory.Invoke(key);
             dictionary[key] = instance;
             return instance;
         }
-        
+
         public static TValue GetOrAdd<TValue>(this IDictionary<string, object> dictionary, string key, TValue defaultValue)
         {
             return GetOrAdd(dictionary, key, () => defaultValue);
@@ -74,7 +74,7 @@ namespace IronSharp.Core
                 {
                     dictionary.Set(key, valueFactory.Invoke());
                 }
-                return (TValue)dictionary[key];
+                return (TValue) dictionary[key];
             }
         }
 
@@ -87,10 +87,10 @@ namespace IronSharp.Core
                 {
                     dictionary.Set(key, valueFactory.Invoke(key));
                 }
-                return (TValue)dictionary[key];
+                return (TValue) dictionary[key];
             }
         }
-        
+
         public static void Set(this IDictionary dictionary, object key, object value)
         {
             Contract.Requires(dictionary != null);

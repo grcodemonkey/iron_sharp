@@ -111,7 +111,7 @@ namespace IronSharp.IronCache
         /// </remarks>
         public CacheIncrementResult Increment(string key, int amount = 1)
         {
-            return RestClient.Post<CacheIncrementResult>(_client.Config, string.Format("{0}/increment", CacheItemEndPoint(key)), new { amount });
+            return RestClient.Post<CacheIncrementResult>(_client.Config, string.Format("{0}/increment", CacheItemEndPoint(key)), new {amount});
         }
 
         /// <summary>
@@ -157,6 +157,7 @@ namespace IronSharp.IronCache
         {
             return item == null || item.Value == null || string.IsNullOrEmpty(Convert.ToString(item.Value));
         }
+
         private string CacheItemEndPoint(string key)
         {
             return string.Format("{0}/items/{1}", CacheNameEndPoint(), key);

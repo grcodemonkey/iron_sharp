@@ -4,7 +4,7 @@
     {
         Seconds = 0,
         Minutes,
-        Hours, 
+        Hours,
         Days,
         Weeks,
         Months,

@@ -5,9 +5,6 @@ namespace IronSharp.IronCache
 {
     public class CacheIncrementResult : IMsg, IInspectable
     {
-        [JsonProperty("msg")]
-        public string Message { get; set; }
-
         public bool Success
         {
             get { return this.HasExpectedMessage("Added"); }
@@ -15,6 +12,9 @@ namespace IronSharp.IronCache
 
         [JsonProperty("value", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public int? Value { get; set; }
+
+        [JsonProperty("msg")]
+        public string Message { get; set; }
 
         public static implicit operator bool(CacheIncrementResult value)
         {

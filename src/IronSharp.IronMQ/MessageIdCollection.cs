@@ -25,14 +25,14 @@ namespace IronSharp.IronMQ
             set { _ids = value; }
         }
 
+        [JsonProperty("msg", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public string Message { get; set; }
+
         [JsonIgnore]
         public bool Success
         {
             get { return this.HasExpectedMessage("Messages put on queue."); }
         }
-
-        [JsonProperty("msg", DefaultValueHandling = DefaultValueHandling.Ignore)]
-        public string Message { get; set; }
 
         public static implicit operator bool(MessageIdCollection collection)
         {

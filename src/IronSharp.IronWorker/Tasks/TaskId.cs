@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 
 namespace IronSharp.IronWorker
 {
-    public class TaskId: IInspectable
+    public class TaskId : IInspectable
     {
         [JsonProperty("id")]
         public string Id { get; set; }
