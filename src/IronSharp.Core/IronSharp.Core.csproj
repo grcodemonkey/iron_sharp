@@ -86,6 +86,8 @@
     <Compile Include="Exceptions\RestResponseException.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="IronSharp.Core.csproj.DotSettings" />
+    <None Include="IronSharp.Core.nuspec" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup />
