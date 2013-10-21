@@ -4,14 +4,13 @@
 # IronSharp is a .NET client for [Iron.io](http://www.iron.io/)
 
 
---------------------------------
 ## Getting Started
 
 1. Sign up at <https://hud.iron.io/users/new>
 2. Get your credentials from <https://hud.iron.io/dashboard>
 
 ## IronCache
-
+<http://dev.iron.io/cache/>
 ```
 // =========================================================
 // Iron.io Cache
@@ -46,6 +45,7 @@ cache.Delete("complex_item");
 ```
 
 ## IronMQ
+<http://dev.iron.io/mq/>
 ```
 // =========================================================
 // Iron.io MQ
@@ -75,8 +75,6 @@ bool deleted = msg.Delete();
 
 Console.WriteLine("Deleted = {0}", deleted);
 
-QueueMessage next;
-
 var payload1 = new
 {
     message = "hello, my name is Iron.io 1"
@@ -96,6 +94,8 @@ MessageIdCollection queuedUp = queue.Post(new[] {payload1, payload2, payload3});
 
 Console.WriteLine(queuedUp.Inspect());
 
+QueueMessage next;
+
 while (queue.Read(out next))
 {
     Console.WriteLine(next.Inspect());
@@ -104,7 +104,7 @@ while (queue.Read(out next))
 ```
 
 ## IronWorker
-
+<http://dev.iron.io/worker/>
 ```
 // =========================================================
 // Iron.io Worker
