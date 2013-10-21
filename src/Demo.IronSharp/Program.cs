@@ -39,7 +39,7 @@ namespace Demo.IronSharpConsole
             // Immediately delete an item
             cache.Delete("number_item");
 
-            cache.Put("complex_item", new {greeting = "Hello", target = "world"});
+            cache.Put("complex_item", new { greeting = "Hello", target = "world" });
 
             // Get value from cache by key
             Console.WriteLine(cache.Get("complex_item").Value);
@@ -91,7 +91,7 @@ namespace Demo.IronSharpConsole
                 message = "hello, my name is Iron.io 3"
             };
 
-            MessageIdCollection queuedUp = queue.Post(new[] {payload1, payload2, payload3});
+            MessageIdCollection queuedUp = queue.Post(new[] { payload1, payload2, payload3 });
 
             Console.WriteLine(queuedUp.Inspect());
 
@@ -107,7 +107,7 @@ namespace Demo.IronSharpConsole
 
             IronWorkerRestClient workerClient = IronSharp.IronWorker.Client.New();
 
-            string taskId = workerClient.Tasks.Create("Test", new {Key = "Value"});
+            string taskId = workerClient.Tasks.Create("Test", new { Key = "Value" });
 
             Console.WriteLine("TaskID: {0}", taskId);
 
@@ -127,7 +127,7 @@ namespace Demo.IronSharpConsole
             var payload = new
             {
                 a = "b",
-                c = new[] {1, 2, 3}
+                c = new[] { 1, 2, 3 }
             };
 
             ScheduleIdCollection schedule = workerClient.Schedules.Create("Test", payload, options);

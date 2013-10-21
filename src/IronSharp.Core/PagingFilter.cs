@@ -10,6 +10,12 @@ namespace IronSharp.Core
         {
         }
 
+        public PagingFilter(int? page = null, int? perPage = null)
+        {
+            Page = page.GetValueOrDefault();
+            PerPage = perPage.GetValueOrDefault();
+        }
+
         public PagingFilter(IPagingFilter filter)
         {
             if (filter == null)

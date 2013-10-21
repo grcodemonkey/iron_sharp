@@ -79,6 +79,7 @@
     <Compile Include="TaskStates.cs" />
     <Compile Include="Tasks\TaskWebhookResponse.cs" />
     <Compile Include="Tasks\TaskInfo.cs" />
+    <Compile Include="Code\WorkerOptions.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

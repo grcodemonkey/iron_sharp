@@ -33,26 +33,6 @@ namespace IronSharp.IronWorker
         }
 
         /// <summary>
-        /// Upload a Code Package
-        /// </summary>
-        /// <remarks>
-        /// http://dev.iron.io/worker/reference/api/#upload_or_update_a_code_package
-        /// </remarks>
-        public Task<HttpResponseMessage> Upload(Stream zipFile, WorkerOptions options)
-        {
-            return RestClient.Execute(_client.Config, new RestClientRequest
-            {
-                EndPoint = EndPoint,
-                Method = HttpMethod.Post,
-                Content = new MultipartFormDataContent
-                {
-                    new JsonContent(options),
-                    new StreamContent(zipFile)
-                }
-            });
-        }
-
-        /// <summary>
         /// Download a Code Package
         /// </summary>
         /// <remarks>
@@ -80,11 +60,7 @@ namespace IronSharp.IronWorker
 
         public RevisionCollection Revisions(int? page = null, int? perPage = null)
         {
-            return Revisions(new PagingFilter
-            {
-                Page = page.GetValueOrDefault(),
-                PerPage = perPage.GetValueOrDefault()
-            });
+            return Revisions(new PagingFilter(page, perPage));
         }
 
         /// <summary>
@@ -96,6 +72,26 @@ namespace IronSharp.IronWorker
         public RevisionCollection Revisions(PagingFilter filter = null)
         {
             return RestClient.Get<RevisionCollection>(_client.Config, EndPoint + "/revisions", filter);
+        }
+
+        /// <summary>
+        /// Upload a Code Package
+        /// </summary>
+        /// <remarks>
+        /// http://dev.iron.io/worker/reference/api/#upload_or_update_a_code_package
+        /// </remarks>
+        public Task<HttpResponseMessage> Upload(Stream zipFile, WorkerOptions options)
+        {
+            return RestClient.Execute(_client.Config, new RestClientRequest
+            {
+                EndPoint = EndPoint,
+                Method = HttpMethod.Post,
+                Content = new MultipartFormDataContent
+                {
+                    new JsonContent(options),
+                    new StreamContent(zipFile)
+                }
+            });
         }
     }
 }
