@@ -168,7 +168,7 @@ namespace IronSharp.Core
             headers.Authorization = new AuthenticationHeaderValue("OAuth", config.Token);
             headers.AcceptEncoding.Add(new StringWithQualityHeaderValue("gzip"));
             headers.AcceptEncoding.Add(new StringWithQualityHeaderValue("deflate"));
-            headers.Accept.Add(new MediaTypeWithQualityHeaderValue("appliction/json"));
+            headers.Accept.Add(new MediaTypeWithQualityHeaderValue(request.Accept));
 
             return httpRequest;
         }

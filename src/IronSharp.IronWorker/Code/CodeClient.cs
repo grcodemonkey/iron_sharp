@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Net.Http;
+using System.Net.Mime;
 using System.Threading.Tasks;
 using IronSharp.Core;
 
@@ -43,7 +44,8 @@ namespace IronSharp.IronWorker
             return RestClient.Execute(_client.Config, new RestClientRequest
             {
                 EndPoint = EndPoint + "/download",
-                Method = HttpMethod.Get
+                Method = HttpMethod.Get,
+                Accept = MediaTypeNames.Application.Octet
             });
         }
 

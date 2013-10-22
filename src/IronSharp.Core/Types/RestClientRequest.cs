@@ -5,12 +5,20 @@ namespace IronSharp.Core
 {
     public class RestClientRequest : IRestClientRequest
     {
+        public RestClientRequest()
+        {
+            Accept = "appliction/json";
+            Method = HttpMethod.Get;
+        }
+
+        public string Accept { get; set; }
+
         public HttpContent Content { get; set; }
 
         public string EndPoint { get; set; }
 
-        public NameValueCollection Query { get; set; }
-
         public HttpMethod Method { get; set; }
+
+        public NameValueCollection Query { get; set; }
     }
 }

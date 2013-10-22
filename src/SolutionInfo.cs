@@ -1,6 +1,5 @@
 using System.Reflection;
 
-[assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("grcodemonkey")]
 

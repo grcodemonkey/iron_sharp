@@ -1,10 +1,15 @@
 ﻿using System;
 using System.IO;
 using System.Reflection;
+using System.Web.Hosting;
+using Common.Logging;
 using Newtonsoft.Json;
 
 namespace IronSharp.Core
 {
+    /// <summary>
+    /// http://dev.iron.io/cache/reference/configuration/
+    /// </summary>
     public static class IronDotConfigManager
     {
         public static string GetEnvironmentKey(IronProduct product, string key)
@@ -16,10 +21,20 @@ namespace IronSharp.Core
             return string.Format("{0}_{1}", productName, key).ToUpper();
         }
 
+        public static T GetEnvironmentValue<T>(IronProduct product, string key, EnvironmentVariableTarget target = EnvironmentVariableTarget.Process)
+        {
+            return GetEnvironmentValue(product, key, default(T), target);
+        }
+
+        public static T GetEnvironmentValue<T>(IronProduct product, string key, T defaultValue, EnvironmentVariableTarget target = EnvironmentVariableTarget.Process)
+        {
+            return Environment.GetEnvironmentVariable(GetEnvironmentKey(product, key), target).As(defaultValue);
+        }
+
         public static IronClientConfig Load(IronProduct product = IronProduct.AllProducts, IronClientConfig overrideConfig = null)
         {
             string homeIronDotJson = Path.Combine(GetHomeDirectory(), ".iron.json");
-            string appIronDotJson = Path.Combine(GetCurrentDirectory(), "iron.json");
+            string appIronDotJson = Path.Combine(GetAppDirectory(), "iron.json");
 
             IronClientConfig home = ParseJsonFile(product, homeIronDotJson);
             IronClientConfig app = ParseJsonFile(product, appIronDotJson);
@@ -28,6 +43,26 @@ namespace IronSharp.Core
             ApplyOverrides(home, overrideConfig);
 
             return home;
+        }
+
+        public static IronClientConfig LoadFromEnvironment(IronProduct product, EnvironmentVariableTarget target = EnvironmentVariableTarget.Process)
+        {
+            var baseConfig = new IronClientConfig
+            {
+                ProjectId = GetEnvironmentValue<string>(IronProduct.AllProducts, "projectid", target),
+                Token = GetEnvironmentValue<string>(IronProduct.AllProducts, "token", target)
+            };
+
+            var productConfig = new IronClientConfig
+            {
+                ProjectId = GetEnvironmentValue<string>(product, "projectid", target),
+                Token = GetEnvironmentValue<string>(product, "token", target),
+                Host = GetEnvironmentValue<string>(product, "host", target)
+            };
+
+            ApplyOverrides(baseConfig, productConfig);
+
+            return baseConfig;
         }
 
         public static IronClientConfig ParseJsonFile(IronProduct product, string filePath)
@@ -46,23 +81,14 @@ namespace IronSharp.Core
             return settings;
         }
 
-        private static IronClientConfig GetProductOverride(IronProduct product, JsonDotConfigModel config)
+        public static void SetEnvironmentValue(IronProduct product, string key, string value, EnvironmentVariableTarget target = EnvironmentVariableTarget.Process)
         {
-            IronClientConfig productOverride = null;
+            Environment.SetEnvironmentVariable(GetEnvironmentKey(product, key), value, target);
+        }
 
-            switch (product)
-            {
-                case IronProduct.IronCache:
-                    productOverride = config.IronCache;
-                    break;
-                case IronProduct.IronMQ:
-                    productOverride = config.IronMQ;
-                    break;
-                case IronProduct.IronWorker:
-                    productOverride = config.IronWoker;
-                    break;
-            }
-            return productOverride;
+        public static void DeleteEnvironmentValue(IronProduct product, string key, EnvironmentVariableTarget target = EnvironmentVariableTarget.Process)
+        {
+            SetEnvironmentValue(product, key, null, target);
         }
 
         private static void ApplyOverrides(IronClientConfig targetConfig, IronClientConfig overrideConfig)
@@ -77,8 +103,12 @@ namespace IronSharp.Core
             targetConfig.Host = string.IsNullOrEmpty(overrideConfig.Host) ? targetConfig.Host : overrideConfig.Host;
         }
 
-        private static string GetCurrentDirectory()
+        private static string GetAppDirectory()
         {
+            if (HostingEnvironment.IsHosted)
+            {
+                return HostingEnvironment.MapPath("~/");
+            }
             return Path.GetDirectoryName(Assembly.GetExecutingAssembly().CodeBase);
         }
 
@@ -111,11 +141,37 @@ namespace IronSharp.Core
             return productName;
         }
 
+        private static IronClientConfig GetProductOverride(IronProduct product, JsonDotConfigModel config)
+        {
+            IronClientConfig productOverride = null;
+
+            switch (product)
+            {
+                case IronProduct.IronCache:
+                    productOverride = config.IronCache;
+                    break;
+                case IronProduct.IronMQ:
+                    productOverride = config.IronMQ;
+                    break;
+                case IronProduct.IronWorker:
+                    productOverride = config.IronWoker;
+                    break;
+            }
+            return productOverride;
+        }
+
         private static JsonDotConfigModel LoadJson(string filePath)
         {
-            if (File.Exists(filePath))
+            try
             {
-                return JsonConvert.DeserializeObject<JsonDotConfigModel>(File.ReadAllText(filePath));
+                if (File.Exists(filePath))
+                {
+                    return JsonConvert.DeserializeObject<JsonDotConfigModel>(File.ReadAllText(filePath));
+                }
+            }
+            catch (IOException ex)
+            {
+                LogManager.GetCurrentClassLogger().Error(ex);
             }
             return new JsonDotConfigModel();
         }

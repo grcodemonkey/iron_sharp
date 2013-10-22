@@ -12,5 +12,7 @@ namespace IronSharp.Core
         NameValueCollection Query { get; set; }
 
         HttpMethod Method { get; set; }
+
+        string Accept { get; set; }
     }
 }
