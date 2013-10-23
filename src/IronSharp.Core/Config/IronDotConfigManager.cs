@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Web.Hosting;
@@ -31,13 +32,13 @@ namespace IronSharp.Core
             return Environment.GetEnvironmentVariable(GetEnvironmentKey(product, key), target).As(defaultValue);
         }
 
-        public static IronClientConfig Load(IronProduct product = IronProduct.AllProducts, IronClientConfig overrideConfig = null)
+        public static IronClientConfig Load(IronProduct product = IronProduct.AllProducts, IronClientConfig overrideConfig = null, string env = null)
         {
             string homeIronDotJson = Path.Combine(GetHomeDirectory(), ".iron.json");
             string appIronDotJson = Path.Combine(GetAppDirectory(), "iron.json");
 
-            IronClientConfig home = ParseJsonFile(product, homeIronDotJson);
-            IronClientConfig app = ParseJsonFile(product, appIronDotJson);
+            IronClientConfig home = ParseJsonFile(product, homeIronDotJson, env);
+            IronClientConfig app = ParseJsonFile(product, appIronDotJson, env);
 
             ApplyOverrides(home, app);
             ApplyOverrides(home, overrideConfig);
@@ -65,9 +66,9 @@ namespace IronSharp.Core
             return baseConfig;
         }
 
-        public static IronClientConfig ParseJsonFile(IronProduct product, string filePath)
+        public static IronClientConfig ParseJsonFile(IronProduct product, string filePath, string env = null)
         {
-            JsonDotConfigModel config = LoadJson(filePath);
+            JsonDotConfigModel config = LoadJson(filePath, env);
 
             var settings = new IronClientConfig
             {
@@ -160,13 +161,24 @@ namespace IronSharp.Core
             return productOverride;
         }
 
-        private static JsonDotConfigModel LoadJson(string filePath)
+        private static JsonDotConfigModel LoadJson(string filePath, string env = null)
         {
             try
             {
                 if (File.Exists(filePath))
                 {
-                    return JsonConvert.DeserializeObject<JsonDotConfigModel>(File.ReadAllText(filePath));
+                    string content = File.ReadAllText(filePath);
+
+                    if (!string.IsNullOrEmpty(env))
+                    {
+                        var envType = JsonConvert.DeserializeObject<Dictionary<string, JsonDotConfigModel>>(content);
+                        JsonDotConfigModel envSpecific;
+                        if (envType.TryGetValue(env, out envSpecific))
+                        {
+                            return envSpecific;
+                        }
+                    }
+                    return JsonConvert.DeserializeObject<JsonDotConfigModel>(content);
                 }
             }
             catch (IOException ex)

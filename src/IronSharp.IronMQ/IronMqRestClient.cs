@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading;
 using IronSharp.Core;
+using IronSharp.Core.Attributes;
 
 namespace IronSharp.IronMQ
 {
@@ -31,6 +32,11 @@ namespace IronSharp.IronMQ
         public string EndPoint
         {
             get { return "/projects/{Project ID}/queues"; }
+        }
+
+        public QueueClient<T> Queue<T>()
+        {
+            return new QueueClient<T>(this, QueueNameAttribute.GetName<T>());
         }
 
         public QueueClient Queue(string name)

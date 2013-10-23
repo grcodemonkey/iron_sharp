@@ -62,6 +62,7 @@
     <Compile Include="QueueClient.cs" />
     <Compile Include="QueueInfo.cs" />
     <Compile Include="QueueMessage.cs" />
+    <Compile Include="QueueMessageContext.cs" />
     <Compile Include="Subscriber.cs" />
     <Compile Include="SubscriberCollection.cs" />
   </ItemGroup>

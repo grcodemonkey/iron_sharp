@@ -52,6 +52,7 @@ namespace IronSharp.IronMQ
         /// <summary>
         /// Releases this message and puts it back on the queue as if the message had timed out.
         /// </summary>
+        /// <param name="delay">The item will not be available on the queue until this many seconds have passed. Default is 0 seconds. Maximum is 604,800 seconds (7 days).</param>
         /// <returns> </returns>
         public bool Release(int? delay = null)
         {

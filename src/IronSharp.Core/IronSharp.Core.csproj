@@ -57,6 +57,7 @@
     <Compile Include="$(SolutionDir)/SolutionInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Attributes\QueueNameAttribute.cs" />
     <Compile Include="DateTimeHelpers.cs" />
     <Compile Include="DefaultValueSerializer.cs" />
     <Compile Include="ExponentialBackoff.cs" />

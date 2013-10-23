@@ -6,6 +6,93 @@ using IronSharp.Core;
 
 namespace IronSharp.IronMQ
 {
+    public class QueueClient<T> : QueueClient
+    {
+        private int? _delay;
+
+        private Action<QueueMessageContext<T>, Exception> _errorHandler;
+
+        public QueueClient(IronMqRestClient client, string name)
+            : base(client, name)
+        {
+        }
+
+        /// <summary>
+        /// Consumes the next message off the queue. Set context.Success to <c>false</c> to *Release* the message back to the queue; otherwise it will be automatically deleted.
+        /// </summary>
+        /// <param name="consumeAction"></param>
+        /// <param name="timeout"></param>
+        /// <returns>
+        /// Returns <c>false</c> if the queue is empty; otherwise <c>true</c>.
+        /// </returns>
+        public bool Consume(Action<QueueMessageContext<T>, T> consumeAction, int? timeout = null)
+        {
+            QueueMessage queueMessage = Next(timeout);
+
+            if (queueMessage == null)
+            {
+                return false;
+            }
+
+            var context = new QueueMessageContext<T>
+            {
+                Message = queueMessage,
+                Success = true,
+                Client = this
+            };
+            
+            try
+            {
+                consumeAction(context, queueMessage.ReadValueAs<T>());
+            }
+            catch (Exception ex)
+            {
+                if (_errorHandler != null)
+                {
+                    context.Success = false;
+                    _errorHandler(context, ex);
+                }
+                else
+                {
+                    throw;
+                }
+            }
+            finally
+            {
+                if (context.Success)
+                {
+                    queueMessage.Delete();
+                }
+                else
+                {
+                    queueMessage.Release(_delay);
+                }
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Sets the delay when the message is released back to the queue.
+        /// </summary>
+        /// <param name="delay">The item will not be available on the queue until this many seconds have passed. Default is 0 seconds. Maximum is 604,800 seconds (7 days).</param>
+        /// <returns></returns>
+        public QueueClient<T> DelayOnRelease(int? delay)
+        {
+            _delay = delay;
+            return this;
+        }
+
+        /// <summary>
+        /// Called whenever an error occurs while consuming the message.  Set context.Success to <c>true</c> to *Delete* the message; otherwise it will be automatically released back to the queue.
+        /// </summary>
+        public QueueClient<T> OnError(Action<QueueMessageContext<T>, Exception> errorHandler)
+        {
+            _errorHandler = errorHandler;
+            return this;
+        }
+    }
+
     /// <summary>
     /// Iron.io MQ Client
     /// </summary>

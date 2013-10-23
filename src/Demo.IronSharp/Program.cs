@@ -140,4 +140,9 @@ namespace Demo.IronSharpConsole
             Console.Read();
         }
     }
+
+    public class SampleClass
+    {
+        public string Name { get; set; }
+    }
 }
