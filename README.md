@@ -11,6 +11,9 @@
 
 ## IronCache
 <http://dev.iron.io/cache/>
+
+```PM> Install-Package IronSharp.IronCache```
+
 ```C#
 // =========================================================
 // Iron.io Cache
@@ -46,6 +49,9 @@ cache.Delete("complex_item");
 
 ## IronMQ
 <http://dev.iron.io/mq/>
+
+```PM> Install-Package IronSharp.IronMQ```
+
 ```C#
 // =========================================================
 // Iron.io MQ
@@ -105,6 +111,9 @@ while (queue.Read(out next))
 
 ## IronWorker
 <http://dev.iron.io/worker/>
+
+```PM> Install-Package IronSharp.IronWorker```
+
 ```C#
 // =========================================================
 // Iron.io Worker
