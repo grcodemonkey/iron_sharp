@@ -12,11 +12,12 @@
     <description>$description$</description>
     <releaseNotes></releaseNotes>
     <tags>iron.io</tags>
+    <dependencies>
+      <dependency id="Common.Logging" />
+      <dependency id="Microsoft.AspNet.WebApi.Client" />
+      <dependency id="Microsoft.Net.Http" />
+      <dependency id="Newtonsoft.Json" />
+    </dependencies>
   </metadata>
-  <dependencies>
-    <dependency id="Common.Logging" />
-    <dependency id="Microsoft.AspNet.WebApi.Client" />
-    <dependency id="Microsoft.Net.Http" />
-    <dependency id="Newtonsoft.Json" />
-  </dependencies>
+
 </package>

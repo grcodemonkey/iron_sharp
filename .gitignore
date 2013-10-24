@@ -109,3 +109,4 @@ UpgradeLog*.XML
 
 # Custom
 Keys.config
+*.nupkg
