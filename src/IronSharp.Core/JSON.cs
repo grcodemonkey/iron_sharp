@@ -26,9 +26,14 @@ namespace IronSharp.Core
 
         public static T Parse<T>(string value, JsonSerializerSettings opts = null)
         {
-            return (T) DeserializeObject(value, typeof (T), opts);
+            return (T)Parse(value, typeof(T), opts);
         }
 
+        public static object Parse(string value, Type type, JsonSerializerSettings opts = null)
+        {
+            return DeserializeObject(value, type, opts);
+        }
+        
         private static object DeserializeObject(string value, Type type, JsonSerializerSettings opts)
         {
             // If the target type is already string, then there is no need to Deserialize the value.

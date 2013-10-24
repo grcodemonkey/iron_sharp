@@ -1,4 +1,5 @@
-﻿using IronSharp.Core;
+﻿using System;
+using IronSharp.Core;
 using ServiceStack.Text;
 
 namespace IronSharp.Extras.ServiceStackSerializers
@@ -8,6 +9,11 @@ namespace IronSharp.Extras.ServiceStackSerializers
         public string Generate(object value)
         {
             return XmlSerializer.SerializeToString(value);
+        }
+
+        public object Parse(string value, Type type)
+        {
+            return XmlSerializer.DeserializeFromString(value, type);
         }
 
         public T Parse<T>(string value)

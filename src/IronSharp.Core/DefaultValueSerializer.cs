@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using System;
+using Newtonsoft.Json;
 
 namespace IronSharp.Core
 {
@@ -18,6 +19,11 @@ namespace IronSharp.Core
         public string Generate(object value)
         {
             return JSON.Generate(value, _settings);
+        }
+
+        public object Parse(string value, Type type)
+        {
+            return JSON.Parse(value, type);
         }
 
         public T Parse<T>(string value)

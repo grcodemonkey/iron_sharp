@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using System;
+using Newtonsoft.Json;
 
 namespace IronSharp.IronMQ
 {
@@ -75,6 +76,11 @@ namespace IronSharp.IronMQ
         public static implicit operator QueueMessage(string message)
         {
             return new QueueMessage(message);
+        }
+
+        public object ReadValueAs(Type type)
+        {
+            return Client.ValueSerializer.Parse(Body, type);
         }
 
         public T ReadValueAs<T>()
