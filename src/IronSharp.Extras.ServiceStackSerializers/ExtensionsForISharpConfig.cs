@@ -18,10 +18,5 @@ namespace IronSharp.Extras.ServiceStackSerializers
         {
             config.SharpConfig.ValueSerializer = new ServiceStackXmlSerializer();
         }
-
-        public static void UseDefaultSerializer(this IIronSharpConfig config)
-        {
-            config.SharpConfig.ValueSerializer = null;
-        }
     }
 }

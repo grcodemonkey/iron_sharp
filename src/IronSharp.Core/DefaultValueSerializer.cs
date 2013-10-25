@@ -31,4 +31,12 @@ namespace IronSharp.Core
             return JSON.Parse<T>(value, _settings);
         }
     }
+
+    public static class ExtensionsForDefaultSerializer
+    {
+        public static void UseDefaultSerializer(this IIronSharpConfig config)
+        {
+            config.SharpConfig.ValueSerializer = null;
+        }
+    }
 }
