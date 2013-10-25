@@ -7,7 +7,8 @@
 ## Getting Started
 
 1. Sign up at <https://hud.iron.io/users/new>
-2. Get your credentials from <https://hud.iron.io/dashboard>
+2. Get your credentials from [https://hud.iron.io/dashboard](https://hud.iron.io/dashboard "Heads up")
+3. Check out the [wiki](https://github.com/grcodemonkey/iron_sharp/wiki "For those that like to read directions")
 
 ## IronCache
 <http://dev.iron.io/cache/>
