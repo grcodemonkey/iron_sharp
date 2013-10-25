@@ -7,17 +7,15 @@
     <authors>$author$</authors>
     <owners>$author$</owners>
     <projectUrl>http://grcodemonkey.github.io/iron_sharp/</projectUrl>
-    <iconUrl>http://c577730.r99.cf2.rackcdn.com/images/FeSharp_Icon.png</iconUrl>
+    <iconUrl>http://c577730.r99.cf2.rackcdn.com/images/FeSharp_Icon_128.png</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
     <releaseNotes></releaseNotes>
     <tags>iron.io</tags>
     <dependencies>
       <dependency id="Common.Logging" />
-      <dependency id="Microsoft.AspNet.WebApi.Client" />
-      <dependency id="Microsoft.Net.Http" />
-      <dependency id="Newtonsoft.Json" />
+      <dependency id="Microsoft.AspNet.WebApi.Client" version="4.0.30506" />
+      <dependency id="Newtonsoft.Json" version="5.0.1" />
     </dependencies>
   </metadata>
-
 </package>

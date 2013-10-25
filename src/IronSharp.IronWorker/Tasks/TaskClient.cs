@@ -156,7 +156,7 @@ namespace IronSharp.IronWorker
         /// </remarks>
         public string Log(string taskId)
         {
-            return RestClient.Get<string>(_client.Config, string.Format("{0}/log", TaskEndPoint(taskId)));
+            return RestClient.Get<string>(_client.Config, string.Format("{0}/log", TaskEndPoint(taskId))).Content.ReadAsStringAsync().Result;
         }
 
         /// <summary>
