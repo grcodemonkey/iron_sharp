@@ -9,9 +9,12 @@ namespace IronSharp.Core
         {
             Accept = "appliction/json";
             Method = HttpMethod.Get;
+            AuthTokenLocation = AuthTokenLocation.Header;
         }
 
         public string Accept { get; set; }
+
+        public AuthTokenLocation AuthTokenLocation { get; set; }
 
         public HttpContent Content { get; set; }
 

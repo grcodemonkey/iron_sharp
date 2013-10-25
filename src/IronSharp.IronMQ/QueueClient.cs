@@ -25,6 +25,19 @@ namespace IronSharp.IronMQ
         /// <returns>
         /// Returns <c>false</c> if the queue is empty; otherwise <c>true</c>.
         /// </returns>
+        public bool Consume(Action<QueueMessageContext<T>, T> consumeAction, TimeSpan timeout)
+        {
+            return Consume(consumeAction, timeout.Seconds);
+        }
+
+        /// <summary>
+        /// Consumes the next message off the queue. Set context.Success to <c>false</c> to *Release* the message back to the queue; otherwise it will be automatically deleted.
+        /// </summary>
+        /// <param name="consumeAction"></param>
+        /// <param name="timeout"></param>
+        /// <returns>
+        /// Returns <c>false</c> if the queue is empty; otherwise <c>true</c>.
+        /// </returns>
         public bool Consume(Action<QueueMessageContext<T>, T> consumeAction, int? timeout = null)
         {
             QueueMessage queueMessage = Next(timeout);
@@ -70,6 +83,16 @@ namespace IronSharp.IronMQ
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// Sets the delay when the message is released back to the queue.
+        /// </summary>
+        /// <param name="delay">The item will not be available on the queue until this many seconds have passed. Default is 0 seconds. Maximum is 604,800 seconds (7 days).</param>
+        /// <returns></returns>
+        public QueueClient<T> DelayOnRelease(TimeSpan delay)
+        {
+            return DelayOnRelease(delay.Seconds);
         }
 
         /// <summary>
@@ -232,6 +255,39 @@ namespace IronSharp.IronMQ
         /// http://dev.iron.io/mq/reference/api/#get_messages_from_a_queue
         /// https://github.com/iron-io/iron_mq_ruby#get-messages-from-a-queue
         /// </remarks>
+        public MessageCollection Get(int? n = null, TimeSpan? timeout = null)
+        {
+            int? seconds = null;
+            if (timeout.HasValue)
+            {
+                seconds = timeout.Value.Seconds;
+            }
+            return Get(n, seconds);
+        }
+
+        /// <summary>
+        /// This call gets/reserves messages from the queue.
+        /// The messages will not be deleted, but will be reserved until the timeout expires.
+        /// If the timeout expires before the messages are deleted, the messages will be placed back onto the queue.
+        /// As a result, be sure to delete the messages after you’re done with them.
+        /// </summary>
+        /// <param name="n">
+        /// The maximum number of messages to get.
+        /// Default is 1.
+        /// Maximum is 100.
+        /// </param>
+        /// <param name="timeout">
+        /// After timeout (in seconds), item will be placed back onto queue.
+        /// You must delete the message from the queue to ensure it does not go back onto the queue.
+        /// If not set, value from POST is used.
+        /// Default is 60 seconds.
+        /// Minimum is 30 seconds.
+        /// Maximum is 86,400 seconds (24 hours).
+        /// </param>
+        /// <remarks>
+        /// http://dev.iron.io/mq/reference/api/#get_messages_from_a_queue
+        /// https://github.com/iron-io/iron_mq_ruby#get-messages-from-a-queue
+        /// </remarks>
         public MessageCollection Get(int? n = null, int? timeout = null)
         {
             var query = new NameValueCollection();
@@ -254,6 +310,17 @@ namespace IronSharp.IronMQ
             }
 
             throw new RestResponseException("Unable to read MessageCollection response", result.ResponseMessage);
+        }
+
+        /// <summary>
+        /// This call gets/reserves the next messages from the queue.
+        /// This message will not be deleted, but will be reserved until the timeout expires.
+        /// If the timeout expires before the message is deleted, this message will be placed back onto the queue.
+        /// As a result, be sure to delete this message after you’re done with it.
+        /// </summary>
+        public QueueMessage Next(TimeSpan timeout)
+        {
+            return Next(timeout.Seconds);
         }
 
         /// <summary>
@@ -356,10 +423,37 @@ namespace IronSharp.IronMQ
         /// </summary>
         /// <param name="message"> The the next message from the queue </param>
         /// <param name="timeout"> The message timeout </param>
+        public bool Read(out QueueMessage message, TimeSpan timeout)
+        {
+            return Read(out message, timeout.Seconds);
+        }
+
+        /// <summary>
+        /// Returns <c> true </c> if the next message is not null. (useful for looping constructs)
+        /// </summary>
+        /// <param name="message"> The the next message from the queue </param>
+        /// <param name="timeout"> The message timeout </param>
         public bool Read(out QueueMessage message, int? timeout = null)
         {
             message = Next(timeout);
             return message != null;
+        }
+
+        /// <summary>
+        /// Releasing a reserved message unreserves the message and puts it back on the queue as if the message had timed out.
+        /// </summary>
+        /// <param name="messageId"> </param>
+        /// <param name="delay">
+        /// The item will not be available on the queue until this many seconds have passed.
+        /// Default is 0 seconds.
+        /// Maximum is 604,800 seconds (7 days).
+        /// </param>
+        /// <remarks>
+        /// http://dev.iron.io/mq/reference/api/#release_a_message_on_a_queue
+        /// </remarks>
+        public bool Release(string messageId, TimeSpan delay)
+        {
+            return Release(messageId, delay.Seconds);
         }
 
         /// <summary>
@@ -396,6 +490,20 @@ namespace IronSharp.IronMQ
         public bool Touch(string messageId)
         {
             return RestClient.Post<ResponseMsg>(_client.Config, string.Format("{0}/messages/{1}/touch", EndPoint, messageId)).HasExpectedMessage("Touched");
+        }
+
+        /// <summary>
+        /// Gets a webhook url that can used by a third party to add messages to this queue.  See http://dev.iron.io/mq/reference/api/#add_messages_to_a_queue_via_webhook for more info.
+        /// </summary>
+        /// <param name="token">(optional) The token to use for the building the request uri if different than the Token specified in the config.</param>
+        public Uri WebhookUri(string token = null)
+        {
+            IRestClientRequest request = new RestClientRequest
+            {
+                EndPoint = string.Format("{0}/messages/webhook", EndPoint),
+                AuthTokenLocation = AuthTokenLocation.Querystring
+            };
+            return RestClient.BuildRequestUri(_client.Config, request, token);
         }
 
         private MessageCollection LinkMessageCollection(RestResponse<MessageCollection> response)

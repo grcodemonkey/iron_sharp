@@ -58,6 +58,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Attributes\QueueNameAttribute.cs" />
+    <Compile Include="Constants\AuthHeaderLocation.cs" />
     <Compile Include="DateTimeHelpers.cs" />
     <Compile Include="DefaultValueSerializer.cs" />
     <Compile Include="ExponentialBackoff.cs" />

@@ -197,16 +197,20 @@ namespace IronSharp.IronWorker
             return string.Format("{0}/tasks/{1}", _client.EndPoint, taskId);
         }
 
-        public TaskIdCollection Webhook(string codeName, object value)
+        public Uri Webhook(string codeName, string token = null)
         {
             if (codeName == null) throw new ArgumentNullException("codeName");
 
-            var query = new NameValueCollection
+            IRestClientRequest request = new RestClientRequest
             {
-                {"code_name", codeName}
+                EndPoint = string.Format("{0}/webhook", EndPoint),
+                AuthTokenLocation = AuthTokenLocation.Querystring,
+                Query = new NameValueCollection
+                {
+                    {"code_name", codeName}
+                }
             };
-
-            return RestClient.Post<TaskIdCollection>(_client.Config, EndPoint + "/webhook", value, query);
+            return RestClient.BuildRequestUri(_client.Config, request, token);
         }
 
         private static void ApplyDateRangeFilters(NameValueCollection query, DateTime? fromTime, DateTime? toTime)
