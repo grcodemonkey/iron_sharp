@@ -10,7 +10,7 @@
     <iconUrl>http://c577730.r99.cf2.rackcdn.com/images/FeSharp_Icon_128.png</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
-    <releaseNotes></releaseNotes>
+    <releaseNotes>Added generate Webhook URI method, added TimeSpan overloads for time parameters</releaseNotes>
     <tags>iron.io,message queue</tags>
     <dependencies>
       <dependency id="IronSharp.Core" />

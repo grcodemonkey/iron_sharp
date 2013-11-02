@@ -12,9 +12,20 @@ namespace IronSharp.Core
 {
     public class RestClient
     {
-        public static HttpClient Create(Uri baseAddress, string authenticationToken)
+        /// <summary>
+        /// Generates the Uri for the specified request.
+        /// </summary>
+        /// <param name="config">The project id and other config values</param>
+        /// <param name="request">The request endpoint and query parameters</param>
+        /// <param name="token">(optional) The token to use for the building the request uri if different than the Token specified in the config.</param>
+        public static Uri BuildRequestUri(IronClientConfig config, IRestClientRequest request, string token = null)
         {
-            return new HttpClient {BaseAddress = baseAddress};
+            if (string.IsNullOrEmpty(token))
+            {
+                token = config.Token;
+            }
+            SetOathQueryParameterIfRequired(request, token);
+            return BuildUri(config, request.EndPoint, request.Query);
         }
 
         public static RestResponse<T> Delete<T>(IronClientConfig config, string endPoint, NameValueCollection query = null, Object payload = null) where T : class
@@ -156,6 +167,7 @@ namespace IronSharp.Core
 
         private static HttpRequestMessage BuildRequest(IronClientConfig config, IRestClientRequest request)
         {
+            SetOathQueryParameterIfRequired(request, config.Token);
             var httpRequest = new HttpRequestMessage
             {
                 Content = request.Content,
@@ -164,8 +176,7 @@ namespace IronSharp.Core
             };
 
             HttpRequestHeaders headers = httpRequest.Headers;
-
-            headers.Authorization = new AuthenticationHeaderValue("OAuth", config.Token);
+            SetOauthHeaderIfRequired(config, request, headers);
             headers.AcceptEncoding.Add(new StringWithQualityHeaderValue("gzip"));
             headers.AcceptEncoding.Add(new StringWithQualityHeaderValue("deflate"));
             headers.Accept.Add(new MediaTypeWithQualityHeaderValue(request.Accept));
@@ -203,6 +214,22 @@ namespace IronSharp.Core
         private static bool IsRetriableStatusCode(HttpResponseMessage response)
         {
             return response != null && response.StatusCode == HttpStatusCode.ServiceUnavailable;
+        }
+
+        private static void SetOathQueryParameterIfRequired(IRestClientRequest request, string token)
+        {
+            if (request.AuthTokenLocation != AuthTokenLocation.Querystring) return;
+
+            request.Query = request.Query ?? new NameValueCollection();
+            request.Query["oauth"] = token;
+        }
+
+        private static void SetOauthHeaderIfRequired(IronClientConfig config, IRestClientRequest request, HttpRequestHeaders headers)
+        {
+            if (request.AuthTokenLocation == AuthTokenLocation.Header)
+            {
+                headers.Authorization = new AuthenticationHeaderValue("OAuth", config.Token);
+            }
         }
     }
 }

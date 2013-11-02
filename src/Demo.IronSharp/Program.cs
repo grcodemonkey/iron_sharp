@@ -60,9 +60,14 @@ namespace Demo.IronSharpConsole
             Console.WriteLine(info.Inspect());
 
             // Put a message on the queue
-            string messageId = @queue.Post("hello world!");
+            string messageId = queue.Post("hello world!");
 
             Console.WriteLine(messageId);
+
+            // Use a webhook to post message from a third party
+            Uri webhookUri = queue.WebhookUri();
+            
+            Console.WriteLine(webhookUri);
 
             // Get a message
             QueueMessage msg = queue.Next();
@@ -104,6 +109,10 @@ namespace Demo.IronSharpConsole
             // =========================================================
             // Iron.io Worker
             // =========================================================
+
+            Console.WriteLine("Be sure to create a 'Test' worker before running this sample");
+            Console.WriteLine("Press ANY key to continue");
+            Console.Read();
 
             IronWorkerRestClient workerClient = IronSharp.IronWorker.Client.New();
 

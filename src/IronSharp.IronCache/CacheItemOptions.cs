@@ -1,10 +1,20 @@
-﻿using IronSharp.Core;
+﻿using System;
+using IronSharp.Core;
 using Newtonsoft.Json;
 
 namespace IronSharp.IronCache
 {
     public class CacheItemOptions : IInspectable
     {
+        public CacheItemOptions()
+        {
+        }
+
+        public CacheItemOptions(TimeSpan expiresIn)
+        {
+            ExpiresIn = expiresIn.Seconds;
+        }
+
         /// <summary>
         /// How long in seconds to keep the item in the cache before it is deleted. By default, items do not expire. Maximum is 2,592,000 seconds (30 days).
         /// </summary>

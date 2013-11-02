@@ -14,5 +14,7 @@ namespace IronSharp.Core
         HttpMethod Method { get; set; }
 
         string Accept { get; set; }
+
+        AuthTokenLocation AuthTokenLocation { get; set; }
     }
 }
