@@ -104,13 +104,22 @@ namespace IronSharp.Core
             targetConfig.Host = string.IsNullOrEmpty(overrideConfig.Host) ? targetConfig.Host : overrideConfig.Host;
         }
 
+        private static string _appDirectory;
+
+        public static void SetAppDirectory(string path)
+        {
+            _appDirectory = path;
+        }
+
         private static string GetAppDirectory()
         {
-            if (HostingEnvironment.IsHosted)
+            if (string.IsNullOrEmpty(_appDirectory))
             {
-                return HostingEnvironment.MapPath("~/");
+                _appDirectory = HostingEnvironment.IsHosted ? 
+                    HostingEnvironment.MapPath("~/") : 
+                    Path.GetDirectoryName(Assembly.GetExecutingAssembly().CodeBase);
             }
-            return Path.GetDirectoryName(Assembly.GetExecutingAssembly().CodeBase);
+            return _appDirectory;
         }
 
         private static string GetHomeDirectory()
@@ -171,7 +180,13 @@ namespace IronSharp.Core
 
                     if (!string.IsNullOrEmpty(env))
                     {
-                        var envType = JsonConvert.DeserializeObject<Dictionary<string, JsonDotConfigModel>>(content);
+                        var envType = JsonConvert.DeserializeObject<Dictionary<string, JsonDotConfigModel>>(content, new JsonSerializerSettings
+                        {
+                            Error = (sender, args) =>
+                            {
+                                args.ErrorContext.Handled = true;
+                            }
+                        });
                         JsonDotConfigModel envSpecific;
                         if (envType.TryGetValue(env, out envSpecific))
                         {
