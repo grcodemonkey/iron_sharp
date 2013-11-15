@@ -8,6 +8,8 @@ namespace IronSharp.IronMQ
 {
     public class QueueInfo : IInspectable
     {
+
+
         [JsonProperty("subscribers", DefaultValueHandling = DefaultValueHandling.Ignore)] private List<Subscriber> _subscribers;
 
         [JsonProperty("id", DefaultValueHandling = DefaultValueHandling.Ignore)]
@@ -26,6 +28,13 @@ namespace IronSharp.IronMQ
         /// </summary>
         [JsonIgnore]
         public PushType PushType { get; set; }
+
+        /// <summary>
+        /// the name of another queue where information about messages that can’t be delivered after retrying retries number of times will be placed. 
+        /// Pass in an empty string to disable error queues. Default is disabled. See also http://dev.iron.io/mq/reference/push_queues/#error_queues
+        /// </summary>
+        [JsonProperty("error_queue", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public string ErrorQueue { get; set; }
 
         /// <summary>
         /// How many times to retry on failure.
