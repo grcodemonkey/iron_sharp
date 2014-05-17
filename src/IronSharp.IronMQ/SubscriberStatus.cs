@@ -4,17 +4,8 @@ using Newtonsoft.Json;
 
 namespace IronSharp.IronMQ
 {
-    public class Subscriber
+    public class SubscriberStatus
     {
-        public Subscriber() : this(null)
-        {
-        }
-
-        public Subscriber(string url)
-        {
-            Url = url;
-        }
-
         [JsonProperty("id", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public string Id { get; set; }
 
@@ -33,23 +24,10 @@ namespace IronSharp.IronMQ
         [JsonProperty("url")]
         public string Url { get; set; }
 
-        [JsonProperty("error_queue", DefaultValueHandling = DefaultValueHandling.Ignore)]
-        public string ErrorQueue { get; set; }
-
         [JsonIgnore]
         public HttpStatusCode StatusCode
         {
             get { return (HttpStatusCode) Code.GetValueOrDefault(200); }
-        }
-
-        public static implicit operator Subscriber(string url)
-        {
-            return new Subscriber(url);
-        }
-
-        public static implicit operator Subscriber(Uri uri)
-        {
-            return new Subscriber(uri.ToString());
         }
     }
 }

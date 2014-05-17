@@ -8,7 +8,11 @@ namespace IronSharp.IronMQ
 {
     public class QueueInfo : IInspectable
     {
-        [JsonProperty("subscribers", DefaultValueHandling = DefaultValueHandling.Ignore)] private List<Subscriber> _subscribers;
+        [JsonProperty("subscribers", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        private List<SubscriberItem> _subscribers;
+        
+        [JsonProperty("alerts", DefaultValueHandling = DefaultValueHandling.Ignore)] 
+        private List<Alert> _alerts;
 
         [JsonProperty("id", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public string Id { get; set; }
@@ -24,8 +28,15 @@ namespace IronSharp.IronMQ
         /// Default is multicast.
         /// To revert push queue to reqular pull queue set pull.
         /// </summary>
-        [JsonIgnore]
+        [JsonProperty("push_type", DefaultValueHandling = DefaultValueHandling.Include)]
         public PushType PushType { get; set; }
+
+        /// <summary>
+        /// the name of another queue where information about messages that can’t be delivered after retrying retries number of times will be placed. 
+        /// Pass in an empty string to disable error queues. Default is disabled. See also http://dev.iron.io/mq/reference/push_queues/#error_queues
+        /// </summary>
+        [JsonProperty("error_queue", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public string ErrorQueue { get; set; }
 
         /// <summary>
         /// How many times to retry on failure.
@@ -46,33 +57,20 @@ namespace IronSharp.IronMQ
         public int? Size { get; set; }
 
         [JsonProperty("total_messages", DefaultValueHandling = DefaultValueHandling.Ignore)]
-        public int? TotalMessages { get; set; }
-
-        [JsonProperty("push_type", DefaultValueHandling = DefaultValueHandling.Ignore)]
-        protected string PushTypeValue
-        {
-            get
-            {
-                switch (PushType)
-                {
-                    case PushType.Pull:
-                        return "push";
-                    case PushType.Multicast:
-                        return "multicast";
-                    case PushType.Unicast:
-                        return "unicast";
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-            }
-            set { PushType = value.As<PushType>(); }
-        }
+        public int? TotalMessages { get; set; }       
 
         [JsonIgnore]
-        public List<Subscriber> Subscribers
+        public List<SubscriberItem> Subscribers
         {
             get { return LazyInitializer.EnsureInitialized(ref _subscribers); }
             set { _subscribers = value; }
+        }
+
+        [JsonIgnore]
+        public List<Alert> Alerts
+        {
+            get { return LazyInitializer.EnsureInitialized(ref _alerts); }
+            set { _alerts = value; }
         }
     }
 }
