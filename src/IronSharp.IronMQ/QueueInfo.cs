@@ -8,9 +8,11 @@ namespace IronSharp.IronMQ
 {
     public class QueueInfo : IInspectable
     {
-
-
-        [JsonProperty("subscribers", DefaultValueHandling = DefaultValueHandling.Ignore)] private List<Subscriber> _subscribers;
+        [JsonProperty("subscribers", DefaultValueHandling = DefaultValueHandling.Ignore)]
+        private List<SubscriberItem> _subscribers;
+        
+        [JsonProperty("alerts", DefaultValueHandling = DefaultValueHandling.Ignore)] 
+        private List<Alert> _alerts;
 
         [JsonProperty("id", DefaultValueHandling = DefaultValueHandling.Ignore)]
         public string Id { get; set; }
@@ -78,10 +80,17 @@ namespace IronSharp.IronMQ
         }
 
         [JsonIgnore]
-        public List<Subscriber> Subscribers
+        public List<SubscriberItem> Subscribers
         {
             get { return LazyInitializer.EnsureInitialized(ref _subscribers); }
             set { _subscribers = value; }
+        }
+
+        [JsonIgnore]
+        public List<Alert> Alerts
+        {
+            get { return LazyInitializer.EnsureInitialized(ref _alerts); }
+            set { _alerts = value; }
         }
     }
 }

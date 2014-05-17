@@ -53,6 +53,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="IronSharp.Extras.ServiceStackSerializers.nuspec" />
     <None Include="packages.config" />
   </ItemGroup>

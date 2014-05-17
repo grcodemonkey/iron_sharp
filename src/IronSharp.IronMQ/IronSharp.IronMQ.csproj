@@ -39,17 +39,25 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.5.0.7\lib\net45\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Newtonsoft.Json.6.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Net.Http" />
+    <Reference Include="System.Runtime.Serialization" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="$(SolutionDir)/SolutionInfo.cs" />
+    <Compile Include="SubscriberItem.cs" />
+    <Compile Include="SubscriberStatusCollection.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Alert.cs" />
+    <Compile Include="AlertCollection.cs" />
+    <Compile Include="AlertType.cs" />
+    <Compile Include="AlertDirection.cs" />
     <Compile Include="Client.cs" />
     <Compile Include="IronMqCloudHosts.cs" />
     <Compile Include="IronMqRestClient.cs" />
@@ -63,8 +71,8 @@
     <Compile Include="QueueInfo.cs" />
     <Compile Include="QueueMessage.cs" />
     <Compile Include="QueueMessageContext.cs" />
-    <Compile Include="Subscriber.cs" />
-    <Compile Include="SubscriberCollection.cs" />
+    <Compile Include="SubscriberStatus.cs" />
+    <Compile Include="SubscriberRequestCollection.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\IronSharp.Core\IronSharp.Core.csproj">
@@ -73,6 +81,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="IronSharp.IronMQ.nuspec" />
     <None Include="packages.config" />
   </ItemGroup>
