@@ -28,7 +28,7 @@ namespace IronSharp.IronMQ
         /// Default is multicast.
         /// To revert push queue to reqular pull queue set pull.
         /// </summary>
-        [JsonIgnore]
+        [JsonProperty("push_type", DefaultValueHandling = DefaultValueHandling.Include)]
         public PushType PushType { get; set; }
 
         /// <summary>
@@ -57,27 +57,7 @@ namespace IronSharp.IronMQ
         public int? Size { get; set; }
 
         [JsonProperty("total_messages", DefaultValueHandling = DefaultValueHandling.Ignore)]
-        public int? TotalMessages { get; set; }
-
-        [JsonProperty("push_type", DefaultValueHandling = DefaultValueHandling.Ignore)]
-        protected string PushTypeValue
-        {
-            get
-            {
-                switch (PushType)
-                {
-                    case PushType.Pull:
-                        return "push";
-                    case PushType.Multicast:
-                        return "multicast";
-                    case PushType.Unicast:
-                        return "unicast";
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-            }
-            set { PushType = value.As<PushType>(); }
-        }
+        public int? TotalMessages { get; set; }       
 
         [JsonIgnore]
         public List<SubscriberItem> Subscribers
