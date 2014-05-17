@@ -1,20 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.Serialization;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Runtime.Serialization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
 namespace IronSharp.IronMQ
 {
-    [JsonConverter(typeof(StringEnumConverter))]
+    [JsonConverter(typeof (StringEnumConverter))]
     public enum AlertDirection
     {
-        [EnumMember(Value = "asc")]
-        Asc,
-        [EnumMember(Value = "desc")]
-        Desc
+        /// <summary>
+        /// An "asc" setting will trigger alerts as the queue grows in size.
+        /// </summary>
+        [EnumMember(Value = "asc")] Asc,
+        /// <summary>
+        /// A "desc" setting will trigger alerts as the queue decreases in size.
+        /// </summary>
+        [EnumMember(Value = "desc")] Desc
     }
 }
