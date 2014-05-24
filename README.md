@@ -26,26 +26,30 @@ IronCacheRestClient ironCacheClient = IronSharp.IronCache.Client.New();
 CacheClient cache = ironCacheClient.Cache("my_cache");
 
 // Put value to cache by key
-cache.Put("number_item", 42);
+await cache.Put("number_item", 42);
+
+CacheItem item =  await cache.Get("number_item");
 
 // Get value from cache by key
-Console.WriteLine(cache.Get("number_item").Value);
+Console.WriteLine(item.Value);
 
 // Get value from cache by key
-Console.WriteLine(cache.Get<int>("number_item"));
+Console.WriteLine(await cache.Get<int>("number_item"));
 
 // Numbers can be incremented
-cache.Increment("number_item", 10);
+await cache.Increment("number_item", 10);
 
 // Immediately delete an item
-cache.Delete("number_item");
+await cache.Delete("number_item");
 
-cache.Put("complex_item", new {greeting = "Hello", target = "world"});
+await cache.Put("complex_item", new { greeting = "Hello", target = "world" });
+
+CacheItem complexItem = await cache.Get("complex_item");
 
 // Get value from cache by key
-Console.WriteLine(cache.Get("complex_item").Value);
+Console.WriteLine(complexItem.Value);
 
-cache.Delete("complex_item");
+await cache.Delete("complex_item");
 ```
 
 ## IronMQ
@@ -63,22 +67,27 @@ IronMqRestClient ironMq = IronSharp.IronMQ.Client.New();
 // Get a Queue object
 QueueClient queue = ironMq.Queue("my_queue");
 
-QueueInfo info = queue.Info();
+QueueInfo info = await queue.Info();
 
 Console.WriteLine(info.Inspect());
 
 // Put a message on the queue
-string messageId = @queue.Post("hello world!");
+string messageId = await queue.Post("hello world!");
 
 Console.WriteLine(messageId);
 
+// Use a webhook to post message from a third party
+Uri webhookUri = queue.WebhookUri();
+
+Console.WriteLine(webhookUri);
+
 // Get a message
-QueueMessage msg = queue.Next();
+QueueMessage msg = await queue.Next();
 
 Console.WriteLine(msg.Inspect());
 
 //# Delete the message
-bool deleted = msg.Delete();
+bool deleted = await msg.Delete();
 
 Console.WriteLine("Deleted = {0}", deleted);
 
@@ -97,7 +106,7 @@ var payload3 = new
     message = "hello, my name is Iron.io 3"
 };
 
-MessageIdCollection queuedUp = queue.Post(new[] {payload1, payload2, payload3});
+MessageIdCollection queuedUp = await queue.Post(new[] { payload1, payload2, payload3 });
 
 Console.WriteLine(queuedUp.Inspect());
 
@@ -106,7 +115,7 @@ QueueMessage next;
 while (queue.Read(out next))
 {
     Console.WriteLine(next.Inspect());
-    Console.WriteLine(next.Delete());
+    Console.WriteLine("Deleted = {0}", await next.Delete());
 }
 ```
 
@@ -122,11 +131,11 @@ while (queue.Read(out next))
 
 IronWorkerRestClient workerClient = IronSharp.IronWorker.Client.New();
 
-string taskId = workerClient.Tasks.Create("Test", new {Key = "Value"});
+string taskId = await workerClient.Tasks.Create("Test", new { Key = "Value" });
 
 Console.WriteLine("TaskID: {0}", taskId);
 
-TaskInfoCollection taskInfoCollection = workerClient.Tasks.List("Test");
+TaskInfoCollection taskInfoCollection = await workerClient.Tasks.List("Test");
 
 foreach (TaskInfo task in taskInfoCollection.Tasks)
 {
@@ -142,12 +151,12 @@ ScheduleOptions options = ScheduleBuilder.Build().
 var payload = new
 {
     a = "b",
-    c = new[] {1, 2, 3}
+    c = new[] { 1, 2, 3 }
 };
 
-ScheduleIdCollection schedule = workerClient.Schedules.Create("Test", payload, options);
+ScheduleIdCollection schedule = await workerClient.Schedules.Create("Test", payload, options);
 
 Console.WriteLine(schedule.Inspect());
 
-workerClient.Schedules.Cancel(schedule.Schedules.First().Id);
+await workerClient.Schedules.Cancel(schedule.Schedules.First().Id);
 ```
