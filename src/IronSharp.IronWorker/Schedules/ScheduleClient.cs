@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics.Contracts;
+using System.Threading.Tasks;
 using IronSharp.Core;
 
 namespace IronSharp.IronWorker
@@ -10,7 +11,10 @@ namespace IronSharp.IronWorker
 
         public ScheduleClient(IronWorkerRestClient client)
         {
-            if (client == null) throw new ArgumentNullException("client");
+            if (client == null)
+            {
+                throw new ArgumentNullException("client");
+            }
             Contract.EndContractBlock();
 
             _client = client;
@@ -26,41 +30,41 @@ namespace IronSharp.IronWorker
             get { return _client.Config.SharpConfig.ValueSerializer; }
         }
 
-        public bool Cancel(string scheduleId)
+        public async Task<bool> Cancel(string scheduleId)
         {
-            return RestClient.Post<ResponseMsg>(_client.Config, ScheduleEndPoint(scheduleId) + "/cancel").HasExpectedMessage("Cancelled");
+            return await RestClient.Post<ResponseMsg>(_client.Config, ScheduleEndPoint(scheduleId) + "/cancel").HasExpectedMessage("Cancelled");
         }
 
-        public ScheduleIdCollection Create(string codeName, object payload, ScheduleOptions options)
+        public async Task<ScheduleIdCollection> Create(string codeName, object payload, ScheduleOptions options)
         {
-            return Create(codeName, ValueSerializer.Generate(payload), options);
+            return await Create(codeName, ValueSerializer.Generate(payload), options);
         }
 
-        public ScheduleIdCollection Create(string codeName, string payload, ScheduleOptions options)
+        public async Task<ScheduleIdCollection> Create(string codeName, string payload, ScheduleOptions options)
         {
-            return Create(new SchedulePayloadCollection(codeName, payload, options));
+            return await Create(new SchedulePayloadCollection(codeName, payload, options));
         }
 
-        public ScheduleIdCollection Create(SchedulePayloadCollection collection)
+        public async Task<ScheduleIdCollection> Create(SchedulePayloadCollection collection)
         {
-            return RestClient.Post<ScheduleIdCollection>(_client.Config, EndPoint, collection);
+            return await RestClient.Post<ScheduleIdCollection>(_client.Config, EndPoint, collection);
         }
 
-        public ScheduleInfo Get(string scheduleId)
+        public async Task<ScheduleInfo> Get(string scheduleId)
         {
-            return RestClient.Get<ScheduleInfo>(_client.Config, ScheduleEndPoint(scheduleId));
+            return await RestClient.Get<ScheduleInfo>(_client.Config, ScheduleEndPoint(scheduleId));
         }
 
         /// <summary>
-        /// List Scheduled Tasks
+        ///     List Scheduled Tasks
         /// </summary>
         /// <param name="filter"> </param>
         /// <remarks>
-        /// http://dev.iron.io/worker/reference/api/#list_scheduled_tasks
+        ///     http://dev.iron.io/worker/reference/api/#list_scheduled_tasks
         /// </remarks>
-        public ScheduleInfoCollection List(PagingFilter filter = null)
+        public async Task<ScheduleInfoCollection> List(PagingFilter filter = null)
         {
-            return RestClient.Get<ScheduleInfoCollection>(_client.Config, EndPoint, filter);
+            return await RestClient.Get<ScheduleInfoCollection>(_client.Config, EndPoint, filter);
         }
 
         public string ScheduleEndPoint(string scheduleId)

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
+using System.Threading.Tasks;
 using IronSharp.Core;
 
 namespace IronSharp.IronMQ
@@ -26,9 +27,9 @@ namespace IronSharp.IronMQ
         /// <returns>
         ///     Returns <c>false</c> if the queue is empty; otherwise <c>true</c>.
         /// </returns>
-        public bool Consume(Action<QueueMessageContext<T>, T> consumeAction, TimeSpan timeout)
+        public async Task<bool> Consume(Action<QueueMessageContext<T>, T> consumeAction, TimeSpan timeout)
         {
-            return Consume(consumeAction, timeout.Seconds);
+            return await Consume(consumeAction, timeout.Seconds);
         }
 
         /// <summary>
@@ -40,9 +41,9 @@ namespace IronSharp.IronMQ
         /// <returns>
         ///     Returns <c>false</c> if the queue is empty; otherwise <c>true</c>.
         /// </returns>
-        public bool Consume(Action<QueueMessageContext<T>, T> consumeAction, int? timeout = null)
+        public async Task<bool> Consume(Action<QueueMessageContext<T>, T> consumeAction, int? timeout = null)
         {
-            QueueMessage queueMessage = Next(timeout);
+            QueueMessage queueMessage = await Next(timeout);
 
             if (queueMessage == null)
             {
@@ -74,17 +75,22 @@ namespace IronSharp.IronMQ
             }
             finally
             {
-                if (context.Success)
-                {
-                    queueMessage.Delete();
-                }
-                else
-                {
-                    queueMessage.Release(_delay);
-                }
+                DeleteOrReleaseMessage(context, queueMessage);
             }
 
             return true;
+        }
+
+        private void DeleteOrReleaseMessage(QueueMessageContext<T> context, QueueMessage queueMessage)
+        {
+            if (context.Success)
+            {
+                queueMessage.Delete().Wait();
+            }
+            else
+            {
+                queueMessage.Release(_delay).Wait();
+            }
         }
 
         /// <summary>
@@ -160,12 +166,11 @@ namespace IronSharp.IronMQ
         /// <remarks>
         ///     http://dev.iron.io/mq/reference/api/#clear_all_messages_from_a_queue
         /// </remarks>
-        public bool Clear()
+        public async Task<bool> Clear()
         {
-            return
-                RestClient
+            return await RestClient
                     .Post<ResponseMsg>(_client.Config, string.Format("{0}/clear", EndPoint))
-                    .HasExpectedMessage("Cleared.");
+                    .ContinueWith(x => x.Result.HasExpectedMessage("Cleared."));
         }
 
         /// <summary>
@@ -174,9 +179,11 @@ namespace IronSharp.IronMQ
         /// <remarks>
         ///     http://dev.iron.io/mq/reference/api/#delete_a_message_queue
         /// </remarks>
-        public bool Delete()
+        public async Task<bool> Delete()
         {
-            return RestClient.Delete<ResponseMsg>(_client.Config, EndPoint).HasExpectedMessage("Deleted.");
+            return await RestClient
+                .Delete<ResponseMsg>(_client.Config, EndPoint)
+                .ContinueWith(x => x.Result.HasExpectedMessage("Deleted."));
         }
 
         /// <summary>
@@ -185,9 +192,9 @@ namespace IronSharp.IronMQ
         /// <remarks>
         ///     http://dev.iron.io/mq/reference/api/#get_info_about_a_message_queue
         /// </remarks>
-        public QueueInfo Info()
+        public async Task<QueueInfo> Info()
         {
-            return RestClient.Get<QueueInfo>(_client.Config, EndPoint);
+            return await RestClient.Get<QueueInfo>(_client.Config, EndPoint);
         }
 
         /// <summary>
@@ -199,9 +206,9 @@ namespace IronSharp.IronMQ
         ///     http://dev.iron.io/mq/reference/api/#update_a_message_queue
         /// </remarks>
         /// <returns> </returns>
-        public QueueInfo Update(QueueInfo updates)
+        public async Task<QueueInfo> Update(QueueInfo updates)
         {
-            return RestClient.Post<QueueInfo>(_client.Config, EndPoint, updates);
+            return await RestClient.Post<QueueInfo>(_client.Config, EndPoint, updates);
         }
 
         #endregion
@@ -216,11 +223,11 @@ namespace IronSharp.IronMQ
         /// <remarks>
         ///     http://dev.iron.io/mq/reference/api/#delete_a_message_from_a_queue
         /// </remarks>
-        public bool Delete(string messageId)
+        public async Task<bool> Delete(string messageId)
         {
-            return
-                RestClient.Delete<ResponseMsg>(_client.Config, string.Format("{0}/messages/{1}", EndPoint, messageId))
-                    .HasExpectedMessage("Deleted");
+            return await RestClient
+                .Delete<ResponseMsg>(_client.Config, string.Format("{0}/messages/{1}", EndPoint, messageId))
+                .ContinueWith(x => x.Result.HasExpectedMessage("Deleted"));
         }
 
         /// <summary>
@@ -230,11 +237,11 @@ namespace IronSharp.IronMQ
         /// <remarks>
         ///     http://dev.iron.io/mq/reference/api/#delete_a_message_from_a_queue
         /// </remarks>
-        public bool Delete(IEnumerable<string> messageIds)
+        public async Task<bool> Delete(IEnumerable<string> messageIds)
         {
-            return
-                RestClient.Delete<ResponseMsg>(_client.Config, string.Format("{0}/messages", EndPoint),
-                    payload: new MessageIdCollection(messageIds)).HasExpectedMessage("Deleted");
+            return await RestClient
+                .Delete<ResponseMsg>(_client.Config, string.Format("{0}/messages", EndPoint), payload: new MessageIdCollection(messageIds))
+                .ContinueWith(x => x.Result.HasExpectedMessage("Deleted"));
         }
 
         /// <summary>
@@ -244,9 +251,9 @@ namespace IronSharp.IronMQ
         /// <remarks>
         ///     http://dev.iron.io/mq/reference/api/#get_message_by_id
         /// </remarks>
-        public QueueMessage Get(string messageId)
+        public async Task<QueueMessage> Get(string messageId)
         {
-            return RestClient.Get<QueueMessage>(_client.Config, string.Format("{0}/messages/{1}", EndPoint, messageId));
+            return await RestClient.Get<QueueMessage>(_client.Config, string.Format("{0}/messages/{1}", EndPoint, messageId));
         }
 
         /// <summary>
@@ -280,14 +287,14 @@ namespace IronSharp.IronMQ
         ///     http://dev.iron.io/mq/reference/api/#get_messages_from_a_queue
         ///     https://github.com/iron-io/iron_mq_ruby#get-messages-from-a-queue
         /// </remarks>
-        public MessageCollection Get(int? n = null, TimeSpan? timeout = null, int? wait = null, bool? delete = null)
+        public async Task<MessageCollection> Get(int? n = null, TimeSpan? timeout = null, int? wait = null, bool? delete = null)
         {
             int? seconds = null;
             if (timeout.HasValue)
             {
                 seconds = timeout.Value.Seconds;
             }
-            return Get(n, seconds, wait, delete);
+            return await Get(n, seconds, wait, delete);
         }
 
         /// <summary>
@@ -321,7 +328,7 @@ namespace IronSharp.IronMQ
         ///     http://dev.iron.io/mq/reference/api/#get_messages_from_a_queue
         ///     https://github.com/iron-io/iron_mq_ruby#get-messages-from-a-queue
         /// </remarks>
-        public MessageCollection Get(int? n = null, int? timeout = null, int? wait = null, bool? delete = null)
+        public async Task<MessageCollection> Get(int? n = null, int? timeout = null, int? wait = null, bool? delete = null)
         {
             var query = new NameValueCollection();
 
@@ -345,7 +352,7 @@ namespace IronSharp.IronMQ
                 query.Add("delete", "true");
             }
 
-            RestResponse<MessageCollection> result = 
+            RestResponse<MessageCollection> result = await
                 RestClient.Get<MessageCollection>(_client.Config, string.Format("{0}/messages", EndPoint), query);
 
             if (result.CanReadResult())
@@ -362,9 +369,9 @@ namespace IronSharp.IronMQ
         ///     If the timeout expires before the message is deleted, this message will be placed back onto the queue.
         ///     As a result, be sure to delete this message after you’re done with it.
         /// </summary>
-        public QueueMessage Next(TimeSpan timeout)
+        public async Task<QueueMessage> Next(TimeSpan timeout)
         {
-            return Next(timeout.Seconds);
+            return await Next(timeout.Seconds);
         }
 
         /// <summary>
@@ -373,9 +380,9 @@ namespace IronSharp.IronMQ
         ///     If the timeout expires before the message is deleted, this message will be placed back onto the queue.
         ///     As a result, be sure to delete this message after you’re done with it.
         /// </summary>
-        public QueueMessage Next(int? timeout = null)
+        public async Task<QueueMessage> Next(int? timeout = null)
         {
-            return Get(1, timeout).Messages.FirstOrDefault();
+            return await Get(1, timeout).ContinueWith(x => x.Result.Messages.FirstOrDefault());
         }
 
         /// <summary>
@@ -385,7 +392,7 @@ namespace IronSharp.IronMQ
         /// <remarks>
         ///     http://dev.iron.io/mq/reference/api/#peek_messages_on_a_queue
         /// </remarks>
-        public MessageCollection Peek(int? n = null)
+        public async Task<MessageCollection> Peek(int? n = null)
         {
             var query = new NameValueCollection();
 
@@ -394,7 +401,7 @@ namespace IronSharp.IronMQ
                 query.Add("n", Convert.ToString(n));
             }
 
-            RestResponse<MessageCollection> result = RestClient.Get<MessageCollection>(_client.Config,
+            RestResponse<MessageCollection> result = await RestClient.Get<MessageCollection>(_client.Config,
                 string.Format("{0}/messages/peek", EndPoint), query);
 
 
@@ -410,14 +417,14 @@ namespace IronSharp.IronMQ
         ///     Returns the next messages on the queue, but it does not reserve it.
         /// </summary>
         /// <returns> </returns>
-        public QueueMessage PeekNext()
+        public async Task<QueueMessage> PeekNext()
         {
-            return Peek(1).Messages.FirstOrDefault();
+            return await Peek(1).ContinueWith(x => x.Result.Messages.FirstOrDefault());
         }
 
-        public string Post(QueueMessage message)
+        public async Task<string> Post(QueueMessage message)
         {
-            MessageIdCollection result = Post(new MessageCollection(message));
+            MessageIdCollection result = await Post(new MessageCollection(message));
 
             if (result.Success)
             {
@@ -427,29 +434,29 @@ namespace IronSharp.IronMQ
             throw new IronSharpException("Failed to queue message");
         }
 
-        public string Post(object message, MessageOptions options = null)
+        public async Task<string> Post(object message, MessageOptions options = null)
         {
-            return Post(new QueueMessage(ValueSerializer.Generate(message), options));
+            return await Post(new QueueMessage(ValueSerializer.Generate(message), options));
         }
 
-        public string Post(string message, MessageOptions options = null)
+        public async Task<string> Post(string message, MessageOptions options = null)
         {
-            return Post(new QueueMessage(message, options));
+            return await Post(new QueueMessage(message, options));
         }
 
-        public MessageIdCollection Post(IEnumerable<object> messages, MessageOptions options = null)
+        public async Task<MessageIdCollection> Post(IEnumerable<object> messages, MessageOptions options = null)
         {
-            return Post(messages.Select(ValueSerializer.Generate), options);
+            return await Post(messages.Select(ValueSerializer.Generate), options);
         }
 
-        public MessageIdCollection Post(IEnumerable<string> messages, MessageOptions options = null)
+        public async Task<MessageIdCollection> Post(IEnumerable<string> messages, MessageOptions options = null)
         {
-            return Post(new MessageCollection(messages, options));
+            return await Post(new MessageCollection(messages, options));
         }
 
-        public MessageIdCollection Post(IEnumerable<QueueMessage> messages)
+        public async Task<MessageIdCollection> Post(IEnumerable<QueueMessage> messages)
         {
-            return Post(new MessageCollection(messages));
+            return await Post(new MessageCollection(messages));
         }
 
         /// <summary>
@@ -458,10 +465,9 @@ namespace IronSharp.IronMQ
         /// <remarks>
         ///     http://dev.iron.io/mq/reference/api/#add_messages_to_a_queue
         /// </remarks>
-        public MessageIdCollection Post(MessageCollection messageCollection)
+        public async Task<MessageIdCollection> Post(MessageCollection messageCollection)
         {
-            return RestClient.Post<MessageIdCollection>(_client.Config, string.Format("{0}/messages", EndPoint),
-                messageCollection);
+            return await RestClient.Post<MessageIdCollection>(_client.Config, string.Format("{0}/messages", EndPoint), messageCollection);
         }
 
         /// <summary>
@@ -481,7 +487,7 @@ namespace IronSharp.IronMQ
         /// <param name="timeout"> The message timeout </param>
         public bool Read(out QueueMessage message, int? timeout = null)
         {
-            message = Next(timeout);
+            message = Next(timeout).Result;
             return message != null;
         }
 
@@ -497,9 +503,9 @@ namespace IronSharp.IronMQ
         /// <remarks>
         ///     http://dev.iron.io/mq/reference/api/#release_a_message_on_a_queue
         /// </remarks>
-        public bool Release(string messageId, TimeSpan delay)
+        public async Task<bool> Release(string messageId, TimeSpan delay)
         {
-            return Release(messageId, delay.Seconds);
+            return await Release(messageId, delay.Seconds);
         }
 
         /// <summary>
@@ -514,7 +520,7 @@ namespace IronSharp.IronMQ
         /// <remarks>
         ///     http://dev.iron.io/mq/reference/api/#release_a_message_on_a_queue
         /// </remarks>
-        public bool Release(string messageId, int? delay = null)
+        public async Task<bool> Release(string messageId, int? delay = null)
         {
             var query = new NameValueCollection();
 
@@ -523,9 +529,9 @@ namespace IronSharp.IronMQ
                 query.Add("delay", Convert.ToString(delay));
             }
 
-            return RestClient
+            return await RestClient
                 .Post<ResponseMsg>(_client.Config, string.Format("{0}/messages/{1}/release", EndPoint, messageId), query)
-                .HasExpectedMessage("Released");
+                .ContinueWith(x => x.Result.HasExpectedMessage("Released"));
         }
 
         /// <summary>
@@ -536,11 +542,11 @@ namespace IronSharp.IronMQ
         /// <remarks>
         ///     http://dev.iron.io/mq/reference/api/#touch_a_message_on_a_queue
         /// </remarks>
-        public bool Touch(string messageId)
+        public async Task<bool> Touch(string messageId)
         {
-            return RestClient
+            return await RestClient
                 .Post<ResponseMsg>(_client.Config, string.Format("{0}/messages/{1}/touch", EndPoint, messageId))
-                .HasExpectedMessage("Touched");
+                .ContinueWith(x => x.Result.HasExpectedMessage("Touched"));
         }
 
         /// <summary>
@@ -584,9 +590,9 @@ namespace IronSharp.IronMQ
         ///     http://dev.iron.io/mq/reference/api/#add_alerts_to_a_queue
         ///     http://dev.iron.io/mq/reference/queue_alerts/
         /// </remarks>
-        public QueueInfo AddAlert(Alert alert)
+        public async Task<QueueInfo> AddAlert(Alert alert)
         {
-            return AddAlerts(new AlertCollection(alert));
+            return await AddAlerts(new AlertCollection(alert));
         }
 
         /// <summary>
@@ -596,9 +602,9 @@ namespace IronSharp.IronMQ
         ///     http://dev.iron.io/mq/reference/api/#add_alerts_to_a_queue
         ///     http://dev.iron.io/mq/reference/queue_alerts/
         /// </remarks>
-        public QueueInfo AddAlerts(AlertCollection alertCollection)
+        public async Task<QueueInfo> AddAlerts(AlertCollection alertCollection)
         {
-            return RestClient.Post<QueueInfo>(_client.Config, string.Format("{0}/alerts", EndPoint), alertCollection);
+            return await RestClient.Post<QueueInfo>(_client.Config, string.Format("{0}/alerts", EndPoint), alertCollection);
         }
 
         /// <summary>
@@ -609,11 +615,13 @@ namespace IronSharp.IronMQ
         /// <remarks>
         ///     http://dev.iron.io/mq/reference/api/#remove_alert_from_a_queue_by_id
         /// </remarks>
-        public bool DeleteAlert(Alert alert)
+        public async Task<bool> DeleteAlert(Alert alert)
         {
             if (alert == null)
+            {
                 return false;
-            return DeleteAlert(alert.Id);
+            }
+            return await DeleteAlert(alert.Id);
         }
 
         /// <summary>
@@ -624,13 +632,14 @@ namespace IronSharp.IronMQ
         /// <remarks>
         ///     http://dev.iron.io/mq/reference/api/#remove_alert_from_a_queue_by_id
         /// </remarks>
-        public bool DeleteAlert(string alertId)
+        public async Task<bool> DeleteAlert(string alertId)
         {
             if (String.IsNullOrEmpty(alertId))
+            {
                 return false;
-            return
-                RestClient.Delete<ResponseMsg>(_client.Config, string.Format("{0}/alerts/{1}", EndPoint, alertId))
-                    .HasExpectedMessage("Deleted");
+            }
+            return await RestClient.Delete<ResponseMsg>(_client.Config, string.Format("{0}/alerts/{1}", EndPoint, alertId))
+                 .ContinueWith(x => x.Result.HasExpectedMessage("Deleted"));
         }
 
         /// <summary>
@@ -639,10 +648,9 @@ namespace IronSharp.IronMQ
         /// <remarks>
         ///     http://dev.iron.io/mq/reference/api/#remove_alerts_from_a_queue
         /// </remarks>
-        public QueueInfo RemoveAlerts(AlertCollection alertCollection)
+        public async Task<QueueInfo> RemoveAlerts(AlertCollection alertCollection)
         {
-            return RestClient.Delete<QueueInfo>(_client.Config, string.Format("{0}/alerts", EndPoint),
-                payload: alertCollection);
+            return await RestClient.Delete<QueueInfo>(_client.Config, string.Format("{0}/alerts", EndPoint), payload: alertCollection);
         }
 
         /// <summary>
@@ -652,9 +660,9 @@ namespace IronSharp.IronMQ
         ///     http://dev.iron.io/mq/reference/api/#update_alerts_to_a_queue
         ///     http://dev.iron.io/mq/reference/queue_alerts/
         /// </remarks>
-        public QueueInfo UpdateAlerts(AlertCollection alertCollection)
+        public async Task<QueueInfo> UpdateAlerts(AlertCollection alertCollection)
         {
-            return RestClient.Put<QueueInfo>(_client.Config, string.Format("{0}/alerts", EndPoint), alertCollection);
+            return await RestClient.Put<QueueInfo>(_client.Config, string.Format("{0}/alerts", EndPoint), alertCollection);
         }
 
         #endregion
@@ -668,9 +676,9 @@ namespace IronSharp.IronMQ
         ///     http://dev.iron.io/mq/reference/api/#add_subscribers_to_a_queue
         ///     http://dev.iron.io/mq/reference/push_queues/
         /// </remarks>
-        public QueueInfo AddSubscribers(SubscriberRequestCollection subscribers)
+        public async Task<QueueInfo> AddSubscribers(SubscriberRequestCollection subscribers)
         {
-            return RestClient.Post<QueueInfo>(_client.Config, string.Format("{0}/subscribers", EndPoint), subscribers);
+            return await RestClient.Post<QueueInfo>(_client.Config, string.Format("{0}/subscribers", EndPoint), subscribers);
         }
 
         /// <summary>
@@ -682,12 +690,10 @@ namespace IronSharp.IronMQ
         /// <remarks>
         ///     http://dev.iron.io/mq/reference/api/#acknowledge__delete_push_message_for_a_subscriber
         /// </remarks>
-        public bool Delete(string messageId, string subscriberId)
+        public async Task<bool> Delete(string messageId, string subscriberId)
         {
-            return
-                RestClient.Get<ResponseMsg>(_client.Config,
-                    string.Format("{0}/messages/{1}/subscribers/{2}", EndPoint, messageId, subscriberId))
-                    .HasExpectedMessage("Deleted");
+            return await RestClient.Get<ResponseMsg>(_client.Config, string.Format("{0}/messages/{1}/subscribers/{2}", EndPoint, messageId, subscriberId))
+                   .ContinueWith(x => x.Result.HasExpectedMessage("Deleted"));
         }
 
         /// <summary>
@@ -699,10 +705,9 @@ namespace IronSharp.IronMQ
         /// <remarks>
         ///     http://dev.iron.io/mq/reference/api/#get_push_status_for_a_message
         /// </remarks>
-        public SubscriberStatusCollection PushStatus(string messageId)
+        public async Task<SubscriberStatusCollection> PushStatus(string messageId)
         {
-            return RestClient.Get<SubscriberStatusCollection>(_client.Config,
-                string.Format("{0}/messages/{1}/subscribers", EndPoint, messageId));
+            return await RestClient.Get<SubscriberStatusCollection>(_client.Config, string.Format("{0}/messages/{1}/subscribers", EndPoint, messageId));
         }
 
         /// <summary>
@@ -711,9 +716,9 @@ namespace IronSharp.IronMQ
         /// <remarks>
         ///     http://dev.iron.io/mq/reference/api/#remove_subscribers_from_a_queue
         /// </remarks>
-        public QueueInfo RemoveSubscribers(SubscriberRequestCollection subscribers)
+        public async Task<QueueInfo> RemoveSubscribers(SubscriberRequestCollection subscribers)
         {
-            return RestClient.
+            return await RestClient.
                 Delete<QueueInfo>(_client.Config, string.Format("{0}/subscribers", EndPoint),
                     payload: subscribers);
         }

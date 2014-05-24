@@ -1,4 +1,5 @@
-﻿using System.Net.Http;
+﻿using System;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -10,6 +11,10 @@ namespace IronSharp.Core
 
         public RestResponse(HttpResponseMessage responseMessage)
         {
+            if (responseMessage == null)
+            {
+                throw new ArgumentNullException("responseMessage");
+            }
             ResponseMessage = responseMessage;
         }
 
@@ -33,7 +38,7 @@ namespace IronSharp.Core
         {
             get
             {
-                ResponseMsg msg = Msg();
+                ResponseMsg msg = Msg().Result;
                 return msg == null ? null : msg.Message;
             }
         }
@@ -61,14 +66,14 @@ namespace IronSharp.Core
             }
         }
 
-        public ResponseMsg Msg()
+        public async Task<ResponseMsg> Msg()
         {
-            return Content.ReadAsAsync<ResponseMsg>().Result;
+            return await Content.ReadAsAsync<ResponseMsg>();
         }
 
-        public Task<T> ReadResultAsync()
+        public async Task<T> ReadResultAsync()
         {
-            return Content.ReadAsAsync<T>();
+            return await Content.ReadAsAsync<T>();
         }
 
         private void SetResult()

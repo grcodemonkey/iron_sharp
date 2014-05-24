@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
 
 namespace IronSharp.IronMQ
@@ -45,9 +46,9 @@ namespace IronSharp.IronMQ
         /// <summary>
         /// This call will delete the message. Be sure you call this after you’re done with a message or it will be placed back on the queue.
         /// </summary>
-        public bool Delete()
+        public async Task<bool> Delete()
         {
-            return Client.Delete(Id);
+            return await Client.Delete(Id);
         }
 
         /// <summary>
@@ -55,17 +56,17 @@ namespace IronSharp.IronMQ
         /// </summary>
         /// <param name="delay">The item will not be available on the queue until this many seconds have passed. Default is 0 seconds. Maximum is 604,800 seconds (7 days).</param>
         /// <returns> </returns>
-        public bool Release(int? delay = null)
+        public async Task<bool> Release(int? delay = null)
         {
-            return Client.Release(Id, delay);
+            return await Client.Release(Id, delay);
         }
 
         /// <summary>
         /// Extends this message's timeout by the duration specified when the message was created, which is 60 seconds by default.
         /// </summary>
-        public bool Touch()
+        public async Task<bool> Touch()
         {
-            return Client.Touch(Id);
+            return await Client.Touch(Id);
         }
 
         #endregion

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 using IronSharp.Core;
 using IronSharp.Core.Attributes;
 
@@ -52,9 +53,9 @@ namespace IronSharp.IronMQ
         /// </summary>
         /// <param name="filter"> </param>
         /// <returns> </returns>
-        public IEnumerable<QueueInfo> Queues(PagingFilter filter = null)
+        public async Task<IEnumerable<QueueInfo>> Queues(PagingFilter filter = null)
         {
-            return RestClient.Get<IEnumerable<QueueInfo>>(_config, EndPoint, filter).Result;
+            return await RestClient.Get<IEnumerable<QueueInfo>>(_config, EndPoint, filter).ContinueWith(x=> x.Result.ReadResultAsync()).Unwrap();
         }
     }
 }
