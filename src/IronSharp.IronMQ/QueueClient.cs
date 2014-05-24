@@ -168,9 +168,7 @@ namespace IronSharp.IronMQ
         /// </remarks>
         public async Task<bool> Clear()
         {
-            return await RestClient
-                    .Post<ResponseMsg>(_client.Config, string.Format("{0}/clear", EndPoint))
-                    .ContinueWith(x => x.Result.HasExpectedMessage("Cleared."));
+            return await RestClient.Post<ResponseMsg>(_client.Config, string.Format("{0}/clear", EndPoint)).HasExpectedMessage("Cleared.");
         }
 
         /// <summary>
@@ -181,9 +179,7 @@ namespace IronSharp.IronMQ
         /// </remarks>
         public async Task<bool> Delete()
         {
-            return await RestClient
-                .Delete<ResponseMsg>(_client.Config, EndPoint)
-                .ContinueWith(x => x.Result.HasExpectedMessage("Deleted."));
+            return await RestClient.Delete<ResponseMsg>(_client.Config, EndPoint).HasExpectedMessage("Deleted.");
         }
 
         /// <summary>
@@ -225,9 +221,7 @@ namespace IronSharp.IronMQ
         /// </remarks>
         public async Task<bool> Delete(string messageId)
         {
-            return await RestClient
-                .Delete<ResponseMsg>(_client.Config, string.Format("{0}/messages/{1}", EndPoint, messageId))
-                .ContinueWith(x => x.Result.HasExpectedMessage("Deleted"));
+            return await RestClient.Delete<ResponseMsg>(_client.Config, string.Format("{0}/messages/{1}", EndPoint, messageId)).HasExpectedMessage("Deleted");
         }
 
         /// <summary>
@@ -239,9 +233,7 @@ namespace IronSharp.IronMQ
         /// </remarks>
         public async Task<bool> Delete(IEnumerable<string> messageIds)
         {
-            return await RestClient
-                .Delete<ResponseMsg>(_client.Config, string.Format("{0}/messages", EndPoint), payload: new MessageIdCollection(messageIds))
-                .ContinueWith(x => x.Result.HasExpectedMessage("Deleted"));
+            return await RestClient.Delete<ResponseMsg>(_client.Config, string.Format("{0}/messages", EndPoint), payload: new MessageIdCollection(messageIds)).HasExpectedMessage("Deleted");
         }
 
         /// <summary>
@@ -401,10 +393,8 @@ namespace IronSharp.IronMQ
                 query.Add("n", Convert.ToString(n));
             }
 
-            RestResponse<MessageCollection> result = await RestClient.Get<MessageCollection>(_client.Config,
-                string.Format("{0}/messages/peek", EndPoint), query);
-
-
+            RestResponse<MessageCollection> result = await RestClient.Get<MessageCollection>(_client.Config, string.Format("{0}/messages/peek", EndPoint), query);
+            
             if (result.CanReadResult())
             {
                 return LinkMessageCollection(result);
@@ -529,9 +519,7 @@ namespace IronSharp.IronMQ
                 query.Add("delay", Convert.ToString(delay));
             }
 
-            return await RestClient
-                .Post<ResponseMsg>(_client.Config, string.Format("{0}/messages/{1}/release", EndPoint, messageId), query)
-                .ContinueWith(x => x.Result.HasExpectedMessage("Released"));
+            return await RestClient.Post<ResponseMsg>(_client.Config, string.Format("{0}/messages/{1}/release", EndPoint, messageId), query).HasExpectedMessage("Released");
         }
 
         /// <summary>
@@ -544,9 +532,7 @@ namespace IronSharp.IronMQ
         /// </remarks>
         public async Task<bool> Touch(string messageId)
         {
-            return await RestClient
-                .Post<ResponseMsg>(_client.Config, string.Format("{0}/messages/{1}/touch", EndPoint, messageId))
-                .ContinueWith(x => x.Result.HasExpectedMessage("Touched"));
+            return await RestClient.Post<ResponseMsg>(_client.Config, string.Format("{0}/messages/{1}/touch", EndPoint, messageId)).HasExpectedMessage("Touched");
         }
 
         /// <summary>
@@ -638,8 +624,7 @@ namespace IronSharp.IronMQ
             {
                 return false;
             }
-            return await RestClient.Delete<ResponseMsg>(_client.Config, string.Format("{0}/alerts/{1}", EndPoint, alertId))
-                 .ContinueWith(x => x.Result.HasExpectedMessage("Deleted"));
+            return await RestClient.Delete<ResponseMsg>(_client.Config, string.Format("{0}/alerts/{1}", EndPoint, alertId)).HasExpectedMessage("Deleted");
         }
 
         /// <summary>
@@ -692,8 +677,7 @@ namespace IronSharp.IronMQ
         /// </remarks>
         public async Task<bool> Delete(string messageId, string subscriberId)
         {
-            return await RestClient.Get<ResponseMsg>(_client.Config, string.Format("{0}/messages/{1}/subscribers/{2}", EndPoint, messageId, subscriberId))
-                   .ContinueWith(x => x.Result.HasExpectedMessage("Deleted"));
+            return await RestClient.Get<ResponseMsg>(_client.Config, string.Format("{0}/messages/{1}/subscribers/{2}", EndPoint, messageId, subscriberId)).HasExpectedMessage("Deleted");
         }
 
         /// <summary>
@@ -718,9 +702,7 @@ namespace IronSharp.IronMQ
         /// </remarks>
         public async Task<QueueInfo> RemoveSubscribers(SubscriberRequestCollection subscribers)
         {
-            return await RestClient.
-                Delete<QueueInfo>(_client.Config, string.Format("{0}/subscribers", EndPoint),
-                    payload: subscribers);
+            return await RestClient.Delete<QueueInfo>(_client.Config, string.Format("{0}/subscribers", EndPoint), payload: subscribers);
         }
 
         #endregion

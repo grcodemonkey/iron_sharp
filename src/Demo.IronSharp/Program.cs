@@ -40,8 +40,10 @@ namespace Demo.IronSharpConsole
             // Put value to cache by key
             await cache.Put("number_item", 42);
 
+            CacheItem item =  await cache.Get("number_item");
+
             // Get value from cache by key
-            Console.WriteLine(cache.Get("number_item").Result.Value);
+            Console.WriteLine(item.Value);
 
             // Get value from cache by key
             Console.WriteLine(await cache.Get<int>("number_item"));
@@ -54,10 +56,20 @@ namespace Demo.IronSharpConsole
 
             await cache.Put("complex_item", new { greeting = "Hello", target = "world" });
 
+            CacheItem complexItem = await cache.Get("complex_item");
+
             // Get value from cache by key
-            Console.WriteLine(cache.Get("complex_item").Result.Value);
+            Console.WriteLine(complexItem.Value);
 
             await cache.Delete("complex_item");
+
+            await cache.Put("sample_class", new SampleClass {Name = "Sample Class CacheItem"});
+
+            SampleClass sampleClassItem = await cache.Get<SampleClass>("sample_class");
+
+            Console.WriteLine(sampleClassItem.Inspect());
+
+            await cache.Delete("sample_class");
         }
 
         private async static Task RunIronMqExample()
@@ -166,7 +178,7 @@ namespace Demo.IronSharpConsole
         }
     }
 
-    public class SampleClass
+    public class SampleClass : IInspectable
     {
         public string Name { get; set; }
     }
