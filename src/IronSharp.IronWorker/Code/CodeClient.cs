@@ -28,9 +28,9 @@ namespace IronSharp.IronWorker
         /// <remarks>
         /// http://dev.iron.io/worker/reference/api/#delete_a_code_package
         /// </remarks>
-        public bool Delete()
+        public async Task<bool> Delete()
         {
-            return RestClient.Delete<ResponseMsg>(_client.Config, EndPoint).HasExpectedMessage("Deleted");
+            return await RestClient.Delete<ResponseMsg>(_client.Config, EndPoint).HasExpectedMessage("Deleted");
         }
 
         /// <summary>
@@ -55,14 +55,14 @@ namespace IronSharp.IronWorker
         /// <remarks>
         /// http://dev.iron.io/worker/reference/api/#get_info_about_a_code_package
         /// </remarks>
-        public CodeInfo Info()
+        public async  Task<CodeInfo> Info()
         {
-            return RestClient.Get<CodeInfo>(_client.Config, EndPoint);
+            return await RestClient.Get<CodeInfo>(_client.Config, EndPoint);
         }
 
-        public RevisionCollection Revisions(int? page = null, int? perPage = null)
+        public async Task<RevisionCollection> Revisions(int? page = null, int? perPage = null)
         {
-            return Revisions(new PagingFilter(page, perPage));
+            return await Revisions(new PagingFilter(page, perPage));
         }
 
         /// <summary>
@@ -71,9 +71,9 @@ namespace IronSharp.IronWorker
         /// <remarks>
         /// http://dev.iron.io/worker/reference/api/#list_code_package_revisions
         /// </remarks>
-        public RevisionCollection Revisions(PagingFilter filter = null)
+        public async Task<RevisionCollection> Revisions(PagingFilter filter = null)
         {
-            return RestClient.Get<RevisionCollection>(_client.Config, EndPoint + "/revisions", filter);
+            return await RestClient.Get<RevisionCollection>(_client.Config, EndPoint + "/revisions", filter);
         }
 
         /// <summary>

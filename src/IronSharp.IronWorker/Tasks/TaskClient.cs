@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics.Contracts;
 using System.Linq;
+using System.Threading.Tasks;
 using IronSharp.Core;
 
 namespace IronSharp.IronWorker
@@ -13,7 +14,10 @@ namespace IronSharp.IronWorker
 
         public TaskClient(IronWorkerRestClient client)
         {
-            if (client == null) throw new ArgumentNullException("client");
+            if (client == null)
+            {
+                throw new ArgumentNullException("client");
+            }
             Contract.EndContractBlock();
 
             _client = client;
@@ -30,49 +34,49 @@ namespace IronSharp.IronWorker
         }
 
         /// <summary>
-        /// Cancel a Task
+        ///     Cancel a Task
         /// </summary>
         /// <param name="taskId"> The ID of the task you want to cancel. </param>
         /// <remarks>
-        /// http://dev.iron.io/worker/reference/api/#cancel_a_task
+        ///     http://dev.iron.io/worker/reference/api/#cancel_a_task
         /// </remarks>
-        public bool Cancel(string taskId)
+        public async Task<bool> Cancel(string taskId)
         {
-            return RestClient.Post<ResponseMsg>(_client.Config, string.Format("{0}/cancel", TaskEndPoint(taskId))).HasExpectedMessage("Cancelled");
+            return await RestClient.Post<ResponseMsg>(_client.Config, string.Format("{0}/cancel", TaskEndPoint(taskId))).HasExpectedMessage("Cancelled");
         }
 
         /// <summary>
-        /// Creates a single task
+        ///     Creates a single task
         /// </summary>
         /// <param name="codeName"> The task Code Name </param>
         /// <param name="payload"> The task payload </param>
         /// <param name="options"> The task options </param>
         /// <returns> The task id </returns>
-        public string Create(string codeName, object payload, TaskOptions options = null)
+        public async Task<string> Create(string codeName, object payload, TaskOptions options = null)
         {
-            return Create(codeName, ValueSerializer.Generate(payload), options);
+            return await Create(codeName, ValueSerializer.Generate(payload), options);
         }
 
         /// <summary>
-        /// Creates a single task
+        ///     Creates a single task
         /// </summary>
         /// <param name="codeName"> The task Code Name </param>
         /// <param name="payload"> The task payload </param>
         /// <param name="options"> The task options </param>
         /// <returns> The task id </returns>
-        public string Create(string codeName, string payload, TaskOptions options = null)
+        public async Task<string> Create(string codeName, string payload, TaskOptions options = null)
         {
-            return Create(new TaskPayload(codeName, payload, options));
+            return await Create(new TaskPayload(codeName, payload, options));
         }
 
         /// <summary>
-        /// Creates a single task
+        ///     Creates a single task
         /// </summary>
         /// <param name="payload"> The task payload </param>
         /// <returns> The task id </returns>
-        public string Create(TaskPayload payload)
+        public async Task<string> Create(TaskPayload payload)
         {
-            TaskIdCollection result = Create(new TaskPayloadCollection(payload));
+            TaskIdCollection result = await Create(new TaskPayloadCollection(payload));
 
             if (result.Success)
             {
@@ -82,53 +86,56 @@ namespace IronSharp.IronWorker
             throw new IronSharpException(string.Format("Task was not queued successfully: {0}", result.Message));
         }
 
-        public TaskIdCollection Create(string codeName, IEnumerable<object> payloads, TaskOptions options = null)
+        public async Task<TaskIdCollection> Create(string codeName, IEnumerable<object> payloads, TaskOptions options = null)
         {
-            return Create(codeName, payloads.Select(ValueSerializer.Generate), options);
+            return await Create(codeName, payloads.Select(ValueSerializer.Generate), options);
         }
 
-        public TaskIdCollection Create(string codeName, IEnumerable<string> payloads, TaskOptions options = null)
+        public async Task<TaskIdCollection> Create(string codeName, IEnumerable<string> payloads, TaskOptions options = null)
         {
-            return Create(new TaskPayloadCollection(codeName, payloads, options));
+            return await Create(new TaskPayloadCollection(codeName, payloads, options));
         }
 
-        public TaskIdCollection Create(IEnumerable<TaskPayload> payloads)
+        public async Task<TaskIdCollection> Create(IEnumerable<TaskPayload> payloads)
         {
-            return Create(new TaskPayloadCollection(payloads));
+            return await Create(new TaskPayloadCollection(payloads));
         }
 
         /// <summary>
-        /// Queue a Task
+        ///     Queue a Task
         /// </summary>
         /// <param name="collection"> </param>
         /// <remarks>
-        /// http://dev.iron.io/worker/reference/api/#queue_a_task
+        ///     http://dev.iron.io/worker/reference/api/#queue_a_task
         /// </remarks>
-        public TaskIdCollection Create(TaskPayloadCollection collection)
+        public async Task<TaskIdCollection> Create(TaskPayloadCollection collection)
         {
-            return RestClient.Post<TaskIdCollection>(_client.Config, EndPoint, collection);
+            return await RestClient.Post<TaskIdCollection>(_client.Config, EndPoint, collection);
         }
 
         /// <summary>
-        /// Get info about a task
+        ///     Get info about a task
         /// </summary>
         /// <param name="taskId"> The ID of the task you want details on. </param>
         /// <remarks>
-        /// http://dev.iron.io/worker/reference/api/#get_info_about_a_task
+        ///     http://dev.iron.io/worker/reference/api/#get_info_about_a_task
         /// </remarks>
-        public TaskInfo Get(string taskId)
+        public async Task<TaskInfo> Get(string taskId)
         {
-            return RestClient.Get<TaskInfo>(_client.Config, TaskEndPoint(taskId));
+            return await RestClient.Get<TaskInfo>(_client.Config, TaskEndPoint(taskId));
         }
 
         /// <summary>
         /// </summary>
         /// <param name="codeName"> The name of your worker (code package). </param>
-        /// <param name="filter"> List filtering options, to filter by Status use Status = TaskStates.Running | TaskStates.Queued to get all Running or Queued tasks </param>
+        /// <param name="filter">
+        ///     List filtering options, to filter by Status use Status = TaskStates.Running | TaskStates.Queued
+        ///     to get all Running or Queued tasks
+        /// </param>
         /// <remarks>
-        /// http://dev.iron.io/worker/reference/api/#list_tasks
+        ///     http://dev.iron.io/worker/reference/api/#list_tasks
         /// </remarks>
-        public TaskInfoCollection List(string codeName, TaskListFilter filter = null)
+        public async Task<TaskInfoCollection> List(string codeName, TaskListFilter filter = null)
         {
             var query = new NameValueCollection
             {
@@ -144,43 +151,45 @@ namespace IronSharp.IronWorker
                 ApplyStatusFilter(query, filter.Status);
             }
 
-            return RestClient.Get<TaskInfoCollection>(_client.Config, EndPoint, query).Result;
+            return await RestClient.Get<TaskInfoCollection>(_client.Config, EndPoint, query);
         }
 
         /// <summary>
-        /// Get a Task’s Log
+        ///     Get a Task’s Log
         /// </summary>
         /// <param name="taskId"> The ID of the task whose log you are retrieving </param>
         /// <remarks>
-        /// http://dev.iron.io/worker/reference/api/#get_a_tasks_log
+        ///     http://dev.iron.io/worker/reference/api/#get_a_tasks_log
         /// </remarks>
-        public string Log(string taskId)
+        public async Task<string> Log(string taskId)
         {
-            return RestClient.Get<string>(_client.Config, string.Format("{0}/log", TaskEndPoint(taskId))).Content.ReadAsStringAsync().Result;
+            return await RestClient.Get<string>(_client.Config, string.Format("{0}/log", TaskEndPoint(taskId)))
+                .ContinueWith(x => x.Result.Content.ReadAsStringAsync())
+                .Unwrap();
         }
 
         /// <summary>
-        /// Set a Task’s Progress
+        ///     Set a Task’s Progress
         /// </summary>
         /// <param name="taskId"> The ID of the task whose progress you are updating. </param>
         /// <param name="taskProgress"> The task progress request </param>
         /// <remarks>
-        /// http://dev.iron.io/worker/reference/api/#set_a_tasks_progress
+        ///     http://dev.iron.io/worker/reference/api/#set_a_tasks_progress
         /// </remarks>
-        public bool Progress(string taskId, TaskProgress taskProgress)
+        public async Task<bool> Progress(string taskId, TaskProgress taskProgress)
         {
-            return RestClient.Post<ResponseMsg>(_client.Config, string.Format("{0}/progress", TaskEndPoint(taskId)), taskProgress).HasExpectedMessage("Progress set");
+            return await RestClient.Post<ResponseMsg>(_client.Config, string.Format("{0}/progress", TaskEndPoint(taskId)), taskProgress).HasExpectedMessage("Progress set");
         }
 
         /// <summary>
-        /// Retry a task
+        ///     Retry a task
         /// </summary>
         /// <param name="taskId"> The ID of the task you want to retry. </param>
         /// <param name="delay"> The number of seconds the task should be delayed before it runs again. </param>
         /// <remarks>
-        /// http://dev.iron.io/worker/reference/api/#retry_a_task
+        ///     http://dev.iron.io/worker/reference/api/#retry_a_task
         /// </remarks>
-        public TaskIdCollection Retry(string taskId, int? delay = null)
+        public async Task<TaskIdCollection> Retry(string taskId, int? delay = null)
         {
             object payload = null;
 
@@ -189,7 +198,7 @@ namespace IronSharp.IronWorker
                 payload = new {delay};
             }
 
-            return RestClient.Post<TaskIdCollection>(_client.Config, string.Format("{0}/retry", TaskEndPoint(taskId)), payload);
+            return await RestClient.Post<TaskIdCollection>(_client.Config, string.Format("{0}/retry", TaskEndPoint(taskId)), payload);
         }
 
         public string TaskEndPoint(string taskId)
@@ -199,7 +208,10 @@ namespace IronSharp.IronWorker
 
         public Uri Webhook(string codeName, string token = null)
         {
-            if (codeName == null) throw new ArgumentNullException("codeName");
+            if (codeName == null)
+            {
+                throw new ArgumentNullException("codeName");
+            }
 
             IRestClientRequest request = new RestClientRequest
             {

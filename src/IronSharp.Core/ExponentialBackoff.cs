@@ -1,13 +1,13 @@
 ﻿using System;
-using System.Threading;
+using System.Threading.Tasks;
 
 namespace IronSharp.Core
 {
     internal static class ExponentialBackoff
     {
-        public static void Sleep(double backoffFactor, int attempt)
+        public static Task Sleep(double backoffFactor, int attempt)
         {
-            Thread.Sleep(TimeSpan.FromMilliseconds(Math.Pow(backoffFactor, attempt)));
+            return Task.Delay(TimeSpan.FromMilliseconds(Math.Pow(backoffFactor, attempt)));
         }
     }
 }

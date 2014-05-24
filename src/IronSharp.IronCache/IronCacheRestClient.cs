@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Specialized;
 using System.Threading;
+using System.Threading.Tasks;
 using IronSharp.Core;
 
 namespace IronSharp.IronCache
@@ -47,9 +48,10 @@ namespace IronSharp.IronCache
         /// <remarks>
         /// http://dev.iron.io/cache/reference/api/#delete_a_cache
         /// </remarks>
-        public bool Delete(string cacheName)
+        public async Task<bool> Delete(string cacheName)
         {
-            return RestClient.Delete<ResponseMsg>(_config, string.Format("{0}/{1}", EndPoint, cacheName)).HasExpectedMessage("Deleted.");
+            return await RestClient.Delete<ResponseMsg>(_config, string.Format("{0}/{1}", EndPoint, cacheName))
+               .ContinueWith(x=> x.Result.HasExpectedMessage("Deleted."));
         }
 
         /// <summary>
@@ -59,7 +61,7 @@ namespace IronSharp.IronCache
         /// <remarks>
         /// http://dev.iron.io/cache/reference/api/#list_caches
         /// </remarks>
-        public CacheInfo[] List(int? page)
+        public async Task<CacheInfo[]> List(int? page)
         {
             var query = new NameValueCollection();
 
@@ -68,7 +70,7 @@ namespace IronSharp.IronCache
                 query.Add("page", Convert.ToString(page));
             }
 
-            return RestClient.Get<CacheInfo[]>(_config, EndPoint, query);
+            return await RestClient.Get<CacheInfo[]>(_config, EndPoint, query);
         }
     }
 }
