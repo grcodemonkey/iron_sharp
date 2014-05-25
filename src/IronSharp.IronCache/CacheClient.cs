@@ -66,6 +66,13 @@ namespace IronSharp.IronCache
             return response;
         }
 
+        /// <summary>
+        ///     This call retrieves an item from the cache. The item will not be deleted.
+        /// </summary>
+        /// <param name="key"> The key the item is stored under in the cache. </param>
+        /// <remarks>
+        ///     http://dev.iron.io/cache/reference/api/#get_an_item_from_a_cache
+        /// </remarks>
         public async Task<T> Get<T>(string key)
         {
             CacheItem item = await Get(key);
@@ -78,6 +85,15 @@ namespace IronSharp.IronCache
             return item.ReadValueAs<T>();
         }
 
+
+        /// <summary>
+        /// Gets the item from the cache, or initializes the cache item's value using the specififed <paramref name="valueFactory"/>.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="key">The cache item's key.</param>
+        /// <param name="valueFactory">The method invoked to create the value</param>
+        /// <param name="options">The options.</param>
+        /// <returns></returns>
         public async Task<T> GetOrAdd<T>(string key, Func<T> valueFactory, CacheItemOptions options = null)
         {
             T item = await Get<T>(key);
@@ -94,6 +110,22 @@ namespace IronSharp.IronCache
             return item;
         }
 
+        public async Task<T> GetOrAdd<T>(string key, Func<Task<T>> valueFactory, CacheItemOptions options = null)
+        {
+            T item = await Get<T>(key);
+
+            if (Equals(item, default(T)))
+            {
+                item = await valueFactory();
+
+                await Put(key, item, options);
+
+                return item;
+            }
+
+            return item;
+        }
+
         public async Task<CacheItem> GetOrAdd(string key, Func<CacheItem> valueFactory)
         {
             CacheItem item = await Get(key);
@@ -101,6 +133,21 @@ namespace IronSharp.IronCache
             if (IsDefaultValue(item))
             {
                 item = valueFactory();
+                await Put(key, item);
+            }
+
+            item.Client = this;
+
+            return item;
+        }
+
+        public async Task<CacheItem> GetOrAdd(string key, Func<Task<CacheItem>> valueFactory)
+        {
+            CacheItem item = await Get(key);
+
+            if (IsDefaultValue(item))
+            {
+                item = await valueFactory();
                 await Put(key, item);
             }
 

@@ -50,8 +50,7 @@ namespace IronSharp.IronCache
         /// </remarks>
         public async Task<bool> Delete(string cacheName)
         {
-            return await RestClient.Delete<ResponseMsg>(_config, string.Format("{0}/{1}", EndPoint, cacheName))
-               .ContinueWith(x=> x.Result.HasExpectedMessage("Deleted."));
+            return await RestClient.Delete<ResponseMsg>(_config, string.Format("{0}/{1}", EndPoint, cacheName)).HasExpectedMessage("Deleted.");
         }
 
         /// <summary>
