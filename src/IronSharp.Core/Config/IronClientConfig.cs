@@ -17,7 +17,7 @@ namespace IronSharp.Core
         public string Token { get; set; }
 
         [JsonProperty("api_version")]
-        public int ApiVersion { get; set; }
+        public int? ApiVersion { get; set; }
 
         [JsonProperty("sharp_config")]
         public IronSharpConfig SharpConfig
