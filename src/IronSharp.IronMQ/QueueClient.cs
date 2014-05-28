@@ -75,21 +75,21 @@ namespace IronSharp.IronMQ
             }
             finally
             {
-                DeleteOrReleaseMessage(context, queueMessage);
+                DeleteOrReleaseMessage(context, queueMessage).Wait();
             }
 
             return true;
         }
 
-        private void DeleteOrReleaseMessage(QueueMessageContext<T> context, QueueMessage queueMessage)
+        private async Task DeleteOrReleaseMessage(QueueMessageContext<T> context, QueueMessage queueMessage)
         {
             if (context.Success)
             {
-                queueMessage.Delete().Wait();
+                await queueMessage.Delete();
             }
             else
             {
-                queueMessage.Release(_delay).Wait();
+                await queueMessage.Release(_delay);
             }
         }
 
@@ -233,7 +233,10 @@ namespace IronSharp.IronMQ
         /// </remarks>
         public async Task<bool> Delete(IEnumerable<string> messageIds)
         {
-            return await RestClient.Delete<ResponseMsg>(_client.Config, string.Format("{0}/messages", EndPoint), payload: new MessageIdCollection(messageIds)).HasExpectedMessage("Deleted");
+            return
+                await
+                    RestClient.Delete<ResponseMsg>(_client.Config, string.Format("{0}/messages", EndPoint), payload: new MessageIdCollection(messageIds))
+                        .HasExpectedMessage("Deleted");
         }
 
         /// <summary>
@@ -394,7 +397,7 @@ namespace IronSharp.IronMQ
             }
 
             RestResponse<MessageCollection> result = await RestClient.Get<MessageCollection>(_client.Config, string.Format("{0}/messages/peek", EndPoint), query);
-            
+
             if (result.CanReadResult())
             {
                 return LinkMessageCollection(result);
@@ -677,7 +680,9 @@ namespace IronSharp.IronMQ
         /// </remarks>
         public async Task<bool> Delete(string messageId, string subscriberId)
         {
-            return await RestClient.Get<ResponseMsg>(_client.Config, string.Format("{0}/messages/{1}/subscribers/{2}", EndPoint, messageId, subscriberId)).HasExpectedMessage("Deleted");
+            return
+                await
+                    RestClient.Get<ResponseMsg>(_client.Config, string.Format("{0}/messages/{1}/subscribers/{2}", EndPoint, messageId, subscriberId)).HasExpectedMessage("Deleted");
         }
 
         /// <summary>

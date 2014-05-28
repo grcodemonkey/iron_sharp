@@ -19,10 +19,7 @@ namespace IronSharp.IronMQ
                 Config.Host = IronMqCloudHosts.DEFAULT;
             }
 
-            if (config.ApiVersion == default (int))
-            {
-                config.ApiVersion = 1;
-            }
+            Config.ApiVersion = config.ApiVersion.GetValueOrDefault(1);
         }
 
         public IronClientConfig Config
@@ -55,7 +52,7 @@ namespace IronSharp.IronMQ
         /// <returns> </returns>
         public async Task<IEnumerable<QueueInfo>> Queues(PagingFilter filter = null)
         {
-            return await RestClient.Get<IEnumerable<QueueInfo>>(_config, EndPoint, filter).ContinueWith(x=> x.Result.ReadResultAsync()).Unwrap();
+            return await RestClient.Get<IEnumerable<QueueInfo>>(_config, EndPoint, filter).ContinueWith(x => x.Result.ReadResultAsync()).Unwrap();
         }
     }
 }

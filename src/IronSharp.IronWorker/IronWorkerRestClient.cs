@@ -16,10 +16,7 @@ namespace IronSharp.IronWorker
                 Config.Host = IronWorkCloudHosts.DEFAULT;
             }
 
-            if (config.ApiVersion == default (int))
-            {
-                config.ApiVersion = 2;
-            }
+            Config.ApiVersion = config.ApiVersion.GetValueOrDefault(2);
         }
 
         public IronClientConfig Config
