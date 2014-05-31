@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{D891A220-AA6F-4D0C-B012-B25875787BA0}</ProjectGuid>
+    <ProjectGuid>{89C8C1C7-9D81-4ED3-BDB6-7CA2F4CD9C78}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>IronSharp.IronMQ</RootNamespace>
-    <AssemblyName>IronSharp.IronMQ</AssemblyName>
+    <RootNamespace>IronSharp.Extras.PushForward</RootNamespace>
+    <AssemblyName>IronSharp.Extras.PushForward</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -29,62 +29,43 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Publish|AnyCPU'">
-    <OutputPath>bin\Publish\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <Optimize>true</Optimize>
-    <DebugType>pdbonly</DebugType>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Newtonsoft.Json.6.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.4.5.11\lib\net40\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Net.Http" />
-    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Net.Http.Formatting, Version=5.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.AspNet.WebApi.Client.5.1.2\lib\net45\System.Net.Http.Formatting.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="$(SolutionDir)/SolutionInfo.cs" />
-    <Compile Include="AlertMessage.cs" />
-    <Compile Include="SubscriberItem.cs" />
-    <Compile Include="SubscriberItemBuilder.cs" />
-    <Compile Include="SubscriberStatusCollection.cs" />
+    <Compile Include="AttributeDictionary.cs" />
+    <Compile Include="PushForwardClient.cs" />
+    <Compile Include="PushForwardQueueClient.cs" />
+    <Compile Include="PushForwardQueueInfo.cs" />
+    <Compile Include="QueuedMessageResult.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Alert.cs" />
-    <Compile Include="AlertCollection.cs" />
-    <Compile Include="AlertType.cs" />
-    <Compile Include="AlertDirection.cs" />
     <Compile Include="Client.cs" />
-    <Compile Include="IronMqCloudHosts.cs" />
-    <Compile Include="IronMqRestClient.cs" />
-    <Compile Include="MessageCollection.cs" />
-    <Compile Include="MessageIdCollection.cs" />
-    <Compile Include="MessageOptions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="PushStatus.cs" />
-    <Compile Include="PushType.cs" />
-    <Compile Include="QueueClient.cs" />
-    <Compile Include="QueueInfo.cs" />
-    <Compile Include="QueueMessage.cs" />
-    <Compile Include="QueueMessageContext.cs" />
-    <Compile Include="SubscriberStatus.cs" />
-    <Compile Include="SubscriberRequestCollection.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\IronSharp.Core\IronSharp.Core.csproj">
       <Project>{1a6cc922-40a5-440a-868d-757fcdb08622}</Project>
       <Name>IronSharp.Core</Name>
     </ProjectReference>
+    <ProjectReference Include="..\IronSharp.IronMQ\IronSharp.IronMQ.csproj">
+      <Project>{d891a220-aa6f-4d0c-b012-b25875787ba0}</Project>
+      <Name>IronSharp.IronMQ</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config" />
-    <None Include="IronSharp.IronMQ.nuspec" />
+    <None Include="IronSharp.Extras.PushForward.nuspec" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

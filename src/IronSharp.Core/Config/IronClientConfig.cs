@@ -3,21 +3,17 @@ using Newtonsoft.Json;
 
 namespace IronSharp.Core
 {
-    public class IronClientConfig : IIronSharpConfig, IInspectable
+    public class IronClientConfig : RestClientConfig, IIronSharpConfig
     {
-        private IronSharpConfig _sharpConfig;
-
-        [JsonProperty("host")]
-        public string Host { get; set; }
-
         [JsonProperty("project_id")]
         public string ProjectId { get; set; }
 
-        [JsonProperty("token")]
-        public string Token { get; set; }
-
         [JsonProperty("api_version")]
         public int? ApiVersion { get; set; }
+
+        #region SharpConfig
+
+        private IronSharpConfig _sharpConfig;
 
         [JsonProperty("sharp_config")]
         public IronSharpConfig SharpConfig
@@ -33,5 +29,7 @@ namespace IronSharp.Core
                 BackoffFactor = 25
             };
         }
+
+        #endregion
     }
 }
