@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
+using IronSharp.Core.Attributes;
 using IronSharp.IronMQ;
 
 namespace IronSharp.Extras.PushForward
@@ -13,51 +15,116 @@ namespace IronSharp.Extras.PushForward
             _ironMq = ironMq;
         }
 
-        public async Task<PushForwardQueueClient> Queue<T>(bool multicast = true)
+        public IronMqRestClient IronMqClient
         {
-            QueueClient<T> queueClient = _ironMq.Queue<T>();
-
-            return new PushForwardQueueClient(queueClient, multicast);
+            get { return _ironMq; }
         }
 
-        public async Task<PushForwardQueueClient> Queue(string name, bool multicast = true)
+        public async Task<PushForwardQueueClient> Queue<T>(PushForwardConfig config = null)
         {
-            QueueClient queueClient = _ironMq.Queue(name);
+            return await Queue(QueueNameAttribute.GetName<T>(), config);
+        }
+
+        public async Task<PushForwardQueueClient> Queue(string name, PushForwardConfig config = null)
+        {
+            LazyInitializer.EnsureInitialized(ref config, ()=> new PushForwardConfig
+            {
+                PushType = PushStyle.Multicast,
+                Retries = 3,
+                RetryDelay = TimeSpan.FromSeconds(60),
+                ErrorQueueName = string.Format("{0}_Errors", name)
+            });
+
+            QueueClient queueClient = IronMqClient.Queue(name);
 
             QueueInfo queueInfo = await queueClient.Info();
 
+            bool requiresPushTypeUpdate = RequiresPushTypeUpdate(queueInfo, config.PushType);
+
+            bool requiresErrorQueueUpdate = RequiresErrorQueueUpdate(queueInfo, config);
+
+            bool requiresRetryUpdate = RequiresRetryUpdate(queueInfo, config);
+
+            bool requiresRetryDelayUpdate = RequiresRetryDelayUpdate(queueInfo, config);
+
+            var update = new QueueInfo();
+
+            bool shouldUpdate = false;
+
+            if (requiresPushTypeUpdate)
+            {
+                shouldUpdate = true;
+                update.PushType = config.PushType == PushStyle.Multicast ? PushType.Multicast : PushType.Unicast;
+            }
+
+            if (requiresErrorQueueUpdate)
+            {
+                shouldUpdate = true;
+                update.ErrorQueue = config.ErrorQueueName;
+            }
+
+            if (requiresRetryUpdate)
+            {
+                shouldUpdate = true;
+                update.Retries = config.Retries;
+            }
+
+            if (requiresRetryDelayUpdate)
+            {
+                shouldUpdate = true;
+                update.RetriesDelay = config.RetryDelay.GetValueOrDefault().Seconds;
+            }
+
+            if (shouldUpdate)
+            {
+                queueInfo = await queueClient.Update(update);
+            }
+
+            return new PushForwardQueueClient(this, queueClient, queueInfo);
+        }
+
+        private static bool RequiresRetryDelayUpdate(QueueInfo queueInfo, PushForwardConfig config)
+        {
+            if (config.Retries == null)
+            {
+                return false;
+            }
+
+            return queueInfo.Retries != config.Retries.Value;
+        }
+
+        private static bool RequiresRetryUpdate(QueueInfo queueInfo, PushForwardConfig config)
+        {
+            if (config.RetryDelay == null)
+            {
+                return false;
+            }
+
+            return queueInfo.RetriesDelay != config.RetryDelay.Value.Seconds;
+        }
+
+        private static bool RequiresErrorQueueUpdate(QueueInfo queueInfo, PushForwardConfig config)
+        {
+            if (string.IsNullOrEmpty(config.ErrorQueueName))
+            {
+                return false;
+            }
+            return !string.Equals(queueInfo.ErrorQueue, config.ErrorQueueName);
+        }
+
+        private static bool RequiresPushTypeUpdate(QueueInfo queueInfo, PushStyle pushStyle)
+        {
             switch (queueInfo.PushType)
             {
                 case PushType.Pull:
-                    queueInfo = await queueClient.Update(new QueueInfo
-                    {
-                        PushType = multicast ? PushType.Multicast : PushType.Unicast
-                    });
-
-                    break;
+                    return true;
                 case PushType.Multicast:
-                    if (!multicast)
-                    {
-                        queueInfo = await queueClient.Update(new QueueInfo
-                        {
-                            PushType = PushType.Unicast
-                        });
-                    }
-                    break;
+                    return pushStyle == PushStyle.Unicast;
                 case PushType.Unicast:
-                    if (multicast)
-                    {
-                        queueInfo = await queueClient.Update(new QueueInfo
-                        {
-                            PushType = PushType.Multicast
-                        });
-                    }
-                    break;
+                    return pushStyle == PushStyle.Multicast;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
-
-            return new PushForwardQueueClient(queueClient, queueInfo);
         }
     }
 }

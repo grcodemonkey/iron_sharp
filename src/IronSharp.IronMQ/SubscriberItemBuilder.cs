@@ -26,12 +26,17 @@ namespace IronSharp.IronMQ
             return uriBuilder.Uri;
         }
 
-        public static SubscriberItem GetSubscriberInfo(Uri endPointUrl, IDictionary<string, string> headers)
+        public static SubscriberItem GetSubscriberItem(EndPointConfig endPoint, string path, NameValueCollection query)
         {
-            return GetSubscriberInfo(endPointUrl.ToString(), headers);
+            return GetSubscriberItem(BuildUri(endPoint, path, query), endPoint.Headers);
         }
 
-        public static SubscriberItem GetSubscriberInfo(string endPointUrl, IDictionary<string, string> headers)
+        public static SubscriberItem GetSubscriberItem(Uri endPointUrl, IDictionary<string, string> headers)
+        {
+            return GetSubscriberItem(endPointUrl.ToString(), headers);
+        }
+
+        public static SubscriberItem GetSubscriberItem(string endPointUrl, IDictionary<string, string> headers)
         {
             if (headers == null)
             {

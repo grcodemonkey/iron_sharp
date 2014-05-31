@@ -46,8 +46,10 @@
     <Compile Include="$(SolutionDir)/SolutionInfo.cs" />
     <Compile Include="AttributeDictionary.cs" />
     <Compile Include="PushForwardClient.cs" />
+    <Compile Include="PushForwardConfig.cs" />
     <Compile Include="PushForwardQueueClient.cs" />
     <Compile Include="PushForwardQueueInfo.cs" />
+    <Compile Include="PushStyle.cs" />
     <Compile Include="QueuedMessageResult.cs" />
   </ItemGroup>
   <ItemGroup>
