@@ -75,6 +75,7 @@
     <Compile Include="Config\EndPointConfig.cs" />
     <Compile Include="Config\RestClientConfig.cs" />
     <Compile Include="Constants\AuthHeaderLocation.cs" />
+    <Compile Include="Constants\IronHeaders.cs" />
     <Compile Include="DateTimeHelpers.cs" />
     <Compile Include="DefaultValueSerializer.cs" />
     <Compile Include="ExponentialBackoff.cs" />

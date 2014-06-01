@@ -1,5 +1,6 @@
 ﻿using System;
 using IronSharp.Core;
+using IronSharp.IronMQ;
 
 namespace IronSharp.Extras.PushForward
 {
@@ -21,5 +22,22 @@ namespace IronSharp.Extras.PushForward
         /// Maximum is 24 hrs - default is 60 seconds
         /// </summary>
         public TimeSpan? RetryDelay { get; set; }
+
+        public PushType GetPushType()
+        {
+            return PushType == PushStyle.Multicast ? IronMQ.PushType.Multicast : IronMQ.PushType.Unicast;
+        }
+
+        public void SetPushType(PushType type)
+        {
+            if (type == IronMQ.PushType.Unicast)
+            {
+                PushType = PushStyle.Unicast;
+            }
+            else
+            {
+                PushType = PushStyle.Multicast;
+            }
+        }
     }
 }

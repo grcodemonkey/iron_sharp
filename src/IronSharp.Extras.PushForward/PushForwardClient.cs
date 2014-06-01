@@ -51,12 +51,6 @@ namespace IronSharp.Extras.PushForward
 
             bool shouldUpdate = false;
 
-            if (requiresPushTypeUpdate)
-            {
-                shouldUpdate = true;
-                update.PushType = config.PushType == PushStyle.Multicast ? PushType.Multicast : PushType.Unicast;
-            }
-
             if (requiresErrorQueueUpdate)
             {
                 shouldUpdate = true;
@@ -75,12 +69,20 @@ namespace IronSharp.Extras.PushForward
                 update.RetriesDelay = config.RetryDelay.GetValueOrDefault().Seconds;
             }
 
+            if (requiresPushTypeUpdate)
+            {
+                shouldUpdate = true;
+            }
+
             if (shouldUpdate)
             {
+                // You should always specify the PushType when calling Update
+                update.PushType = config.GetPushType();
+
                 queueInfo = await queueClient.Update(update);
             }
 
-            return new PushForwardQueueClient(this, queueClient, queueInfo);
+            return new PushForwardQueueClient(this, queueClient, queueInfo, config);
         }
 
         public async Task AddAlertToErrorQueue(string errorQueueName, Alert alert)

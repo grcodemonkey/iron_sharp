@@ -664,9 +664,10 @@ namespace IronSharp.IronMQ
         ///     http://dev.iron.io/mq/reference/api/#add_subscribers_to_a_queue
         ///     http://dev.iron.io/mq/reference/push_queues/
         /// </remarks>
-        public async Task<QueueInfo> AddSubscribers(SubscriberRequestCollection subscribers)
+        public async Task<bool> AddSubscribers(SubscriberRequestCollection subscribers)
         {
-            return await RestClient.Post<QueueInfo>(_client.Config, string.Format("{0}/subscribers", EndPoint), subscribers);
+            return await RestClient.Post<ResponseMsg>(_client.Config, string.Format("{0}/subscribers", EndPoint), subscribers).
+                HasExpectedMessage("Updated");
         }
 
         /// <summary>
@@ -680,9 +681,8 @@ namespace IronSharp.IronMQ
         /// </remarks>
         public async Task<bool> Delete(string messageId, string subscriberId)
         {
-            return
-                await
-                    RestClient.Get<ResponseMsg>(_client.Config, string.Format("{0}/messages/{1}/subscribers/{2}", EndPoint, messageId, subscriberId)).HasExpectedMessage("Deleted");
+            return await RestClient.Get<ResponseMsg>(_client.Config, string.Format("{0}/messages/{1}/subscribers/{2}", EndPoint, messageId, subscriberId)).
+                HasExpectedMessage("Deleted");
         }
 
         /// <summary>
