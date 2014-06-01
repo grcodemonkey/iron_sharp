@@ -34,7 +34,7 @@ namespace IronSharp.IronCache
         public bool? Add { get; set; }
 
         /// <summary>
-        ///  If set, the new item will only be placed in the cache if there is an existing item with a matching key and cas value. An item’s cas value is automatically generated and is
+        /// CAS (Check and Set) - If <c>true</c>, the new item will only be placed in the cache if there is an existing item with a matching key and cas value. An item’s cas value is automatically generated and is
         /// included when the item is retrieved.
         /// </summary>
         [JsonProperty("cas", DefaultValueHandling = DefaultValueHandling.Ignore)]

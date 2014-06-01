@@ -12,11 +12,6 @@
     <description>$description$</description>
     <releaseNotes>Package now creates an iron.json file in application root</releaseNotes>
     <tags>iron.io</tags>
-    <dependencies>
-      <dependency id="Common.Logging" />
-      <dependency id="Microsoft.AspNet.WebApi.Client" version="4.0.30506" />
-      <dependency id="Newtonsoft.Json" version="5.0.1" />
-    </dependencies>
   </metadata>
   <files>
     <file src="Content/iron.json" target="content/iron.json" />
