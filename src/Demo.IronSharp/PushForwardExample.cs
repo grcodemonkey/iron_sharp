@@ -21,16 +21,22 @@ namespace Demo.IronSharpConsole
 
             PushForwardQueueClient pushQueue = await pushForwardClient.PushQueue("PushForward");
 
-            if (!pushQueue.HasSubscriber(endPointUrl))
+            string wrongUrl = endPointUrl + "notexists.wrong";
+
+            if (!pushQueue.HasSubscriber(wrongUrl))
             {
                 await pushQueue.AddSubscriber(new SubscriberItem
                 {
-                    Url = endPointUrl,
+                    Url = wrongUrl,
                     Headers = new Dictionary<string, string>
                     {
                         {"Content-Type", "application/json"}
                     }
                 });
+
+                Console.WriteLine("Subscriber added");
+                Console.WriteLine(pushQueue.QueueInfo.Inspect());
+                Console.Read();
             }
 
             MessageIdCollection queuedUp = await pushQueue.QueuePushMessage(new
@@ -40,6 +46,18 @@ namespace Demo.IronSharpConsole
             });
 
             Console.WriteLine(queuedUp.Inspect());
+
+            Console.WriteLine("Message pushed to bad end point");
+            Console.Read();
+
+            await pushQueue.ReplaceSubscribers(endPointUrl);
+
+            Console.WriteLine("End point fixed");
+            Console.Read();
+
+            MessageIdCollection resentMessages = await pushQueue.ResendFailedMessages();
+
+            Console.WriteLine(resentMessages.Inspect());
         }
     }
 }

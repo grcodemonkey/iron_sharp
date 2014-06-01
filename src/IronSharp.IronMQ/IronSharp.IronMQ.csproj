@@ -57,6 +57,7 @@
   <ItemGroup>
     <Compile Include="$(SolutionDir)/SolutionInfo.cs" />
     <Compile Include="AlertMessage.cs" />
+    <Compile Include="ErrorQueueMessage.cs" />
     <Compile Include="SubscriberItem.cs" />
     <Compile Include="SubscriberItemBuilder.cs" />
     <Compile Include="SubscriberStatusCollection.cs" />

@@ -82,5 +82,12 @@ namespace IronSharp.Extras.PushForward
 
             return new PushForwardQueueClient(this, queueClient, queueInfo);
         }
+
+        public async Task AddAlertToErrorQueue(string errorQueueName, Alert alert)
+        {
+            QueueClient errorQ = _ironMq.Queue(errorQueueName);
+
+            await errorQ.AddAlert(alert);
+        }
     }
 }

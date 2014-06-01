@@ -34,7 +34,12 @@ namespace IronSharp.IronMQ
 
         public QueueClient<T> Queue<T>()
         {
-            return new QueueClient<T>(this, QueueNameAttribute.GetName<T>());
+            return Queue<T>(QueueNameAttribute.GetName<T>());
+        }
+
+        public QueueClient<T> Queue<T>(string name)
+        {
+            return new QueueClient<T>(this, name);
         }
 
         public QueueClient Queue(string name)
@@ -52,7 +57,9 @@ namespace IronSharp.IronMQ
         /// <returns> </returns>
         public async Task<IEnumerable<QueueInfo>> Queues(PagingFilter filter = null)
         {
-            return await RestClient.Get<IEnumerable<QueueInfo>>(_config, EndPoint, filter).ContinueWith(x => x.Result.ReadResultAsync()).Unwrap();
+            return await RestClient.Get<IEnumerable<QueueInfo>>(_config, EndPoint, filter).
+                ContinueWith(x => x.Result.ReadResultAsync()).
+                Unwrap();
         }
     }
 }
