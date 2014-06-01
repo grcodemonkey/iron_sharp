@@ -45,12 +45,13 @@
   <ItemGroup>
     <Compile Include="$(SolutionDir)/SolutionInfo.cs" />
     <Compile Include="AttributeDictionary.cs" />
+    <Compile Include="FailedMessageRetrySender.cs" />
+    <Compile Include="IFailedMessageRetrySender.cs" />
     <Compile Include="PushForwardClient.cs" />
     <Compile Include="PushForwardConfig.cs" />
     <Compile Include="PushForwardQueueClient.cs" />
-    <Compile Include="PushForwardQueueInfo.cs" />
     <Compile Include="PushStyle.cs" />
-    <Compile Include="QueuedMessageResult.cs" />
+    <Compile Include="QueueInfoHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Client.cs" />

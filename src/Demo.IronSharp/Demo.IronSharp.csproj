@@ -44,8 +44,13 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="IronCachExample.cs" />
+    <Compile Include="IronMqExample.cs" />
+    <Compile Include="IronWorkerExample.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="PushForwardExample.cs" />
+    <Compile Include="SampleClass.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -55,6 +60,10 @@
     <ProjectReference Include="..\IronSharp.Core\IronSharp.Core.csproj">
       <Project>{1a6cc922-40a5-440a-868d-757fcdb08622}</Project>
       <Name>IronSharp.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\IronSharp.Extras.PushForward\IronSharp.Extras.PushForward.csproj">
+      <Project>{89c8c1c7-9d81-4ed3-bdb6-7ca2f4cd9c78}</Project>
+      <Name>IronSharp.Extras.PushForward</Name>
     </ProjectReference>
     <ProjectReference Include="..\IronSharp.IronCache\IronSharp.IronCache.csproj">
       <Project>{2603e861-09ab-482e-bf28-41d8b0b1b20b}</Project>

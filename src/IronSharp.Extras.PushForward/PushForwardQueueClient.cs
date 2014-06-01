@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using IronSharp.Core;
 using IronSharp.IronMQ;
@@ -12,7 +13,8 @@ namespace IronSharp.Extras.PushForward
     {
         private readonly PushForwardClient _client;
         private readonly QueueClient _queueClient;
-        
+        private IFailedMessageRetrySender _failedMessageRetrySender;
+
         public PushForwardQueueClient(PushForwardClient client, QueueClient queueClient, QueueInfo queueInfo)
         {
             QueueInfo = queueInfo;
@@ -20,10 +22,117 @@ namespace IronSharp.Extras.PushForward
             _queueClient = queueClient;
         }
 
+        public IFailedMessageRetrySender FailedMessageRetrySender
+        {
+            get { return LazyInitializer.EnsureInitialized(ref _failedMessageRetrySender, () => new FailedMessageRetrySender(_client, _queueClient)); }
+            set { _failedMessageRetrySender = value; }
+        }
+
         public QueueInfo QueueInfo { get; set; }
+
+        public async Task AddSubscriber(EndPointConfig endPoint, string path, NameValueCollection query = null)
+        {
+            await AddSubscriber(SubscriberItemBuilder.GetSubscriberItem(endPoint, path, query));
+        }
+
+        public async Task AddSubscriber(string subscriberUrl)
+        {
+            await AddSubscriber(new SubscriberItem(subscriberUrl));
+        }
+
+        public async Task AddSubscriber(SubscriberItem subscriber)
+        {
+            QueueInfo = await _queueClient.AddSubscribers(new SubscriberRequestCollection
+            {
+                Subscribers = new List<SubscriberItem> { subscriber }
+            });
+        }
+
+        public Uri GetWebhookUri(string token = null)
+        {
+            return _queueClient.WebhookUri(token);
+        }
+
+        public bool HasSubscriber(EndPointConfig endPoint, string path, NameValueCollection query = null)
+        {
+            return HasSubscriber(SubscriberItemBuilder.GetSubscriberItem(endPoint, path, query));
+        }
+
+        public bool HasSubscriber(string subscriberUrl)
+        {
+            return HasSubscriber(new SubscriberItem(subscriberUrl));
+        }
+
+        public bool HasSubscriber(SubscriberItem subscriber)
+        {
+            return QueueInfo.Subscribers.Any(x => SubscriberItem.SubscriberItemComparer.Equals(x, subscriber));
+        }
+
+        public async Task<MessageIdCollection> QueuePushMessage(IEnumerable<object> payloads, MessageOptions messageOptions = null)
+        {
+            return await _queueClient.Post(payloads, messageOptions);
+        }
+
+        public async Task<MessageIdCollection> QueuePushMessage(object payload, MessageOptions messageOptions = null)
+        {
+            return await QueuePushMessage(new[] {payload}, messageOptions);
+        }
+
+        public async Task RemoveSubscriber(EndPointConfig endPoint, string path, NameValueCollection query = null)
+        {
+            await RemoveSubscriber(SubscriberItemBuilder.GetSubscriberItem(endPoint, path, query));
+        }
+
+        public async Task RemoveSubscriber(string subscriberUrl)
+        {
+            await RemoveSubscriber(new SubscriberItem(subscriberUrl));
+        }
+
+        public async Task RemoveSubscriber(SubscriberItem subscriber)
+        {
+            QueueInfo = await _queueClient.RemoveSubscribers(new SubscriberRequestCollection
+            {
+                Subscribers = new List<SubscriberItem> { subscriber }
+            });
+        }
+
+        public async Task ReplaceSubscribers(EndPointConfig endPoint, string path, NameValueCollection query = null)
+        {
+            await ReplaceSubscribers(SubscriberItemBuilder.GetSubscriberItem(endPoint, path, query));
+        }
+
+        public async Task ReplaceSubscribers(string subscriberUrl)
+        {
+            await ReplaceSubscribers(new SubscriberItem(subscriberUrl));
+        }
+
+        public async Task ReplaceSubscribers(SubscriberItem subscriberItem)
+        {
+            await ReplaceSubscribers(new List<SubscriberItem> { subscriberItem });
+        }
+
+        public async Task ReplaceSubscribers(List<SubscriberItem> subscribers)
+        {
+            QueueInfo = await _queueClient.Update(new QueueInfo
+            {
+                Subscribers = subscribers
+            });
+        }
+
+        public async Task<MessageIdCollection> ResendFailedMessages(int? limit = null)
+        {
+            return await ResendFailedMessages(CancellationToken.None, limit);
+        }
+
+        public async Task<MessageIdCollection> ResendFailedMessages(CancellationToken cancellationToken, int? limit = null)
+        {
+            return await FailedMessageRetrySender.ResendFailedMessages(cancellationToken, limit);
+        }
 
         public async Task SetErrorQueue(string errorQueueName)
         {
+            QueueInfo = await _queueClient.Info();
+
             if (string.Equals(QueueInfo.ErrorQueue, errorQueueName))
             {
                 return;
@@ -33,80 +142,6 @@ namespace IronSharp.Extras.PushForward
             {
                 ErrorQueue = errorQueueName
             });
-        }
-
-        public Uri GetWebhookUri(string token = null)
-        {
-            return _queueClient.WebhookUri(token);
-        }
-
-        public async Task AddSubscriber(EndPointConfig endPoint, string path, NameValueCollection query)
-        {
-            await AddSubscriber(SubscriberItemBuilder.GetSubscriberItem(endPoint, path, query));
-        }
-
-        public async Task AddSubscriber(SubscriberItem subscriber)
-        {
-            QueueInfo = await _queueClient.Info();
-
-            if (QueueInfo.Subscribers.Any(x => SubscriberItem.SubscriberItemComparer.Equals(x, subscriber)))
-            {
-                return;
-            }
-
-            QueueInfo = await _queueClient.AddSubscribers(new SubscriberRequestCollection
-            {
-                Subscribers = new List<SubscriberItem> {subscriber}
-            });
-        }
-
-        public async Task RemoveSubscriber(EndPointConfig endPoint, string path, NameValueCollection query)
-        {
-            await RemoveSubscriber(SubscriberItemBuilder.GetSubscriberItem(endPoint, path, query));
-        }
-
-        public async Task RemoveSubscriber(SubscriberItem subscriber)
-        {
-            QueueInfo = await _queueClient.Info();
-
-            if (QueueInfo.Subscribers.Any(x => SubscriberItem.SubscriberItemComparer.Equals(x, subscriber)))
-            {
-                QueueInfo = await _queueClient.RemoveSubscribers(new SubscriberRequestCollection
-                {
-                    Subscribers = new List<SubscriberItem> { subscriber }
-                });
-            }           
-        }
-
-        public async Task ResendFailedMessages()
-        {
-            string errorQueueName = QueueInfo.ErrorQueue;
-
-            if (string.IsNullOrEmpty(errorQueueName))
-            {
-                return;
-            }
-
-            QueueClient errorQ = _client.IronMqClient.Queue(errorQueueName);
-
-            QueueMessage next;
-
-            while (errorQ.Read(out next))
-            {
-                await _queueClient.Post(next);
-                await  next.Delete();
-            }
-        }
-
-        public async Task<QueuedMessageResult> QueuePushMessage(object payload, MessageOptions messageOptions = null)
-        {
-            string messageId = await _queueClient.Post(payload, messageOptions);
-
-            return new QueuedMessageResult
-            {
-                MessageId = messageId,
-                Success = !string.IsNullOrEmpty(messageId)
-            };
         }
     }
 }

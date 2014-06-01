@@ -20,14 +20,14 @@ namespace IronSharp.Extras.PushForward
             get { return _ironMq; }
         }
 
-        public async Task<PushForwardQueueClient> Queue<T>(PushForwardConfig config = null)
+        public async Task<PushForwardQueueClient> PushQueue<T>(PushForwardConfig config = null)
         {
-            return await Queue(QueueNameAttribute.GetName<T>(), config);
+            return await PushQueue(QueueNameAttribute.GetName<T>(), config);
         }
 
-        public async Task<PushForwardQueueClient> Queue(string name, PushForwardConfig config = null)
+        public async Task<PushForwardQueueClient> PushQueue(string name, PushForwardConfig config = null)
         {
-            LazyInitializer.EnsureInitialized(ref config, ()=> new PushForwardConfig
+            LazyInitializer.EnsureInitialized(ref config, () => new PushForwardConfig
             {
                 PushType = PushStyle.Multicast,
                 Retries = 3,
@@ -39,13 +39,13 @@ namespace IronSharp.Extras.PushForward
 
             QueueInfo queueInfo = await queueClient.Info();
 
-            bool requiresPushTypeUpdate = RequiresPushTypeUpdate(queueInfo, config.PushType);
+            bool requiresPushTypeUpdate = QueueInfoHelper.RequiresPushTypeUpdate(queueInfo, config.PushType);
 
-            bool requiresErrorQueueUpdate = RequiresErrorQueueUpdate(queueInfo, config);
+            bool requiresErrorQueueUpdate = QueueInfoHelper.RequiresErrorQueueUpdate(queueInfo, config);
 
-            bool requiresRetryUpdate = RequiresRetryUpdate(queueInfo, config);
+            bool requiresRetryUpdate = QueueInfoHelper.RequiresRetryUpdate(queueInfo, config);
 
-            bool requiresRetryDelayUpdate = RequiresRetryDelayUpdate(queueInfo, config);
+            bool requiresRetryDelayUpdate = QueueInfoHelper.RequiresRetryDelayUpdate(queueInfo, config);
 
             var update = new QueueInfo();
 
@@ -81,50 +81,6 @@ namespace IronSharp.Extras.PushForward
             }
 
             return new PushForwardQueueClient(this, queueClient, queueInfo);
-        }
-
-        private static bool RequiresRetryDelayUpdate(QueueInfo queueInfo, PushForwardConfig config)
-        {
-            if (config.Retries == null)
-            {
-                return false;
-            }
-
-            return queueInfo.Retries != config.Retries.Value;
-        }
-
-        private static bool RequiresRetryUpdate(QueueInfo queueInfo, PushForwardConfig config)
-        {
-            if (config.RetryDelay == null)
-            {
-                return false;
-            }
-
-            return queueInfo.RetriesDelay != config.RetryDelay.Value.Seconds;
-        }
-
-        private static bool RequiresErrorQueueUpdate(QueueInfo queueInfo, PushForwardConfig config)
-        {
-            if (string.IsNullOrEmpty(config.ErrorQueueName))
-            {
-                return false;
-            }
-            return !string.Equals(queueInfo.ErrorQueue, config.ErrorQueueName);
-        }
-
-        private static bool RequiresPushTypeUpdate(QueueInfo queueInfo, PushStyle pushStyle)
-        {
-            switch (queueInfo.PushType)
-            {
-                case PushType.Pull:
-                    return true;
-                case PushType.Multicast:
-                    return pushStyle == PushStyle.Unicast;
-                case PushType.Unicast:
-                    return pushStyle == PushStyle.Multicast;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
         }
     }
 }

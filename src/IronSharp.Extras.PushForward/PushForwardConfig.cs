@@ -1,8 +1,9 @@
 ﻿using System;
+using IronSharp.Core;
 
 namespace IronSharp.Extras.PushForward
 {
-    public class PushForwardConfig
+    public class PushForwardConfig : IInspectable
     {
         public string ErrorQueueName { get; set; }
 

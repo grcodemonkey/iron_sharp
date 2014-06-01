@@ -19,10 +19,7 @@ namespace IronSharp.IronMQ
                 Config.Host = IronMqCloudHosts.DEFAULT;
             }
 
-            if (config.ApiVersion == default (int))
-            {
-                config.ApiVersion = 1;
-            }
+            Config.ApiVersion = config.ApiVersion.GetValueOrDefault(1);
         }
 
         public IronClientConfig Config
