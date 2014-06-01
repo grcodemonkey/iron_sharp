@@ -12,9 +12,5 @@
     <description>$description$</description>
     <releaseNotes>All API methods are now awaitable</releaseNotes>
     <tags>iron.io,cache</tags>
-    <dependencies>
-      <dependency id="IronSharp.Core" />
-      <dependency id="Newtonsoft.Json" />
-    </dependencies>
   </metadata>
 </package>
