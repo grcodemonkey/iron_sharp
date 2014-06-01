@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Specialized;
 using System.IO;
-using System.Net;
 using System.Net.Http;
-using System.Net.Http.Headers;
+using System.Threading;
 using System.Threading.Tasks;
-using System.Web;
 using Common.Logging;
 
 namespace IronSharp.Core
@@ -24,13 +22,13 @@ namespace IronSharp.Core
             {
                 token = config.Token;
             }
-            SetOathQueryParameterIfRequired(request, token);
-            return BuildUri(config, request.EndPoint, request.Query);
+            RestUtility.SetOathQueryParameterIfRequired(request, token);
+            return RestUtility.BuildProjectUri(config, request.EndPoint, request.Query);
         }
 
         public static async Task<RestResponse<T>> Delete<T>(IronClientConfig config, string endPoint, NameValueCollection query = null, Object payload = null) where T : class
         {
-            HttpRequestMessage request = BuildRequest(config, new RestClientRequest
+            HttpRequestMessage request = RestUtility.BuildIronRequest(config, new RestClientRequest
             {
                 EndPoint = endPoint,
                 Query = query,
@@ -49,7 +47,7 @@ namespace IronSharp.Core
 
         public static Task<HttpResponseMessage> Execute(IronClientConfig config, IRestClientRequest request)
         {
-            HttpRequestMessage httpRequest = BuildRequest(config, new RestClientRequest
+            HttpRequestMessage httpRequest = RestUtility.BuildIronRequest(config, new RestClientRequest
             {
                 EndPoint = request.EndPoint,
                 Query = request.Query,
@@ -65,7 +63,7 @@ namespace IronSharp.Core
 
         public static async Task<RestResponse<T>> Get<T>(IronClientConfig config, string endPoint, NameValueCollection query = null) where T : class
         {
-            HttpRequestMessage request = BuildRequest(config, new RestClientRequest
+            HttpRequestMessage request = RestUtility.BuildIronRequest(config, new RestClientRequest
             {
                 EndPoint = endPoint,
                 Query = query,
@@ -77,7 +75,7 @@ namespace IronSharp.Core
 
         public static async Task<RestResponse<T>> Post<T>(IronClientConfig config, string endPoint, object payload = null, NameValueCollection query = null) where T : class
         {
-            HttpRequestMessage request = BuildRequest(config, new RestClientRequest
+            HttpRequestMessage request = RestUtility.BuildIronRequest(config, new RestClientRequest
             {
                 EndPoint = endPoint,
                 Query = query,
@@ -96,7 +94,7 @@ namespace IronSharp.Core
 
         public static async Task<RestResponse<T>> Put<T>(IronClientConfig config, string endPoint, object payload, NameValueCollection query = null) where T : class
         {
-            HttpRequestMessage request = BuildRequest(config, new RestClientRequest
+            HttpRequestMessage request = RestUtility.BuildIronRequest(config, new RestClientRequest
             {
                 EndPoint = endPoint,
                 Query = query,
@@ -152,7 +150,7 @@ namespace IronSharp.Core
                     return response;
                 }
 
-                if (HttpClientOptions.EnableRetry && IsRetriableStatusCode(response))
+                if (HttpClientOptions.EnableRetry && RestUtility.IsRetriableStatusCode(response))
                 {
                     attempt++;
 
@@ -162,73 +160,6 @@ namespace IronSharp.Core
                 }
 
                 return response;
-            }
-        }
-
-        private static HttpRequestMessage BuildRequest(IronClientConfig config, IRestClientRequest request)
-        {
-            SetOathQueryParameterIfRequired(request, config.Token);
-            var httpRequest = new HttpRequestMessage
-            {
-                Content = request.Content,
-                RequestUri = BuildUri(config, request.EndPoint, request.Query),
-                Method = request.Method
-            };
-
-            HttpRequestHeaders headers = httpRequest.Headers;
-            SetOauthHeaderIfRequired(config, request, headers);
-            headers.AcceptEncoding.Add(new StringWithQualityHeaderValue("gzip"));
-            headers.AcceptEncoding.Add(new StringWithQualityHeaderValue("deflate"));
-            headers.Accept.Add(new MediaTypeWithQualityHeaderValue(request.Accept));
-
-            return httpRequest;
-        }
-
-        private static Uri BuildUri(IronClientConfig config, string path, NameValueCollection query)
-        {
-            if (path.StartsWith("/"))
-            {
-                path = path.Substring(1);
-            }
-
-            string queryString = "";
-
-            if (query != null && query.Count > 0)
-            {
-                NameValueCollection httpValueCollection = HttpUtility.ParseQueryString("");
-
-                httpValueCollection.Add(query);
-
-                queryString = httpValueCollection.ToString();
-            }
-
-            var uriBuilder = new UriBuilder(Uri.UriSchemeHttps, config.Host)
-            {
-                Path = string.Format("{0}/{1}", config.ApiVersion, path.Replace("{Project ID}", config.ProjectId)),
-                Query = queryString
-            };
-
-            return uriBuilder.Uri;
-        }
-
-        private static bool IsRetriableStatusCode(HttpResponseMessage response)
-        {
-            return response != null && response.StatusCode == HttpStatusCode.ServiceUnavailable;
-        }
-
-        private static void SetOathQueryParameterIfRequired(IRestClientRequest request, string token)
-        {
-            if (request.AuthTokenLocation != AuthTokenLocation.Querystring) return;
-
-            request.Query = request.Query ?? new NameValueCollection();
-            request.Query["oauth"] = token;
-        }
-
-        private static void SetOauthHeaderIfRequired(IronClientConfig config, IRestClientRequest request, HttpRequestHeaders headers)
-        {
-            if (request.AuthTokenLocation == AuthTokenLocation.Header)
-            {
-                headers.Authorization = new AuthenticationHeaderValue("OAuth", config.Token);
             }
         }
     }

@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{51A944C8-8A3D-4AB6-A475-6B2C204CD823}</ProjectGuid>
+    <ProjectGuid>{89C8C1C7-9D81-4ED3-BDB6-7CA2F4CD9C78}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>IronSharp.Extras.ServiceStackSerializers</RootNamespace>
-    <AssemblyName>IronSharp.Extras.ServiceStackSerializers</AssemblyName>
+    <RootNamespace>IronSharp.Extras.PushForward</RootNamespace>
+    <AssemblyName>IronSharp.Extras.PushForward</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -36,32 +36,47 @@
     <AssemblyOriginatorKeyFile>pubkey.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="ServiceStack.Text, Version=4.0.20.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\ServiceStack.Text.Signed.4.0.21\lib\net40\ServiceStack.Text.dll</HintPath>
+      <HintPath>..\packages\Newtonsoft.Json.6.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Net.Http.Formatting, Version=5.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.AspNet.WebApi.Client.5.1.2\lib\net45\System.Net.Http.Formatting.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="$(SolutionDir)/SolutionInfo.cs" />
+    <Compile Include="AttributeDictionary.cs" />
+    <Compile Include="FailedMessageRetrySender.cs" />
+    <Compile Include="IFailedMessageRetrySender.cs" />
+    <Compile Include="PushForwardClient.cs" />
+    <Compile Include="PushForwardConfig.cs" />
+    <Compile Include="PushForwardQueueClient.cs" />
+    <Compile Include="PushStyle.cs" />
+    <Compile Include="QueueInfoHelper.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ExtensionsForISharpConfig.cs" />
+    <Compile Include="Client.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ServiceStackJsonSerializer.cs" />
-    <Compile Include="ServiceStackTypeSerializer.cs" />
-    <Compile Include="ServiceStackXmlSerializer.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\IronSharp.Core\IronSharp.Core.csproj">
       <Project>{1a6cc922-40a5-440a-868d-757fcdb08622}</Project>
       <Name>IronSharp.Core</Name>
     </ProjectReference>
+    <ProjectReference Include="..\IronSharp.IronMQ\IronSharp.IronMQ.csproj">
+      <Project>{d891a220-aa6f-4d0c-b012-b25875787ba0}</Project>
+      <Name>IronSharp.IronMQ</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-    <None Include="IronSharp.Extras.ServiceStackSerializers.nuspec" />
+    <None Include="IronSharp.Extras.PushForward.nuspec" />
     <None Include="pack.bat" />
     <None Include="packages.config" />
     <None Include="pubkey.snk" />

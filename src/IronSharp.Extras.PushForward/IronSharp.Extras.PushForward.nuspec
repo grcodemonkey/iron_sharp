@@ -9,8 +9,8 @@
     <projectUrl>http://grcodemonkey.github.io/iron_sharp/</projectUrl>
     <iconUrl>http://c577730.r99.cf2.rackcdn.com/images/FeSharp_Icon_128.png</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>$description$</description>
+    <description>Automatic push queues for your REST services</description>
     <releaseNotes></releaseNotes>
-    <tags>iron.io,serializers,jsv,servicestack</tags>
+    <tags>iron.io,message queue</tags>
   </metadata>
 </package>
