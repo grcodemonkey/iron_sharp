@@ -10,7 +10,7 @@
     <iconUrl>http://c577730.r99.cf2.rackcdn.com/images/FeSharp_Icon_128.png</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
-    <releaseNotes>All API methods are now awaitable</releaseNotes>
+    <releaseNotes>Updated dependency on Common.Logging to latest version</releaseNotes>
     <tags>iron.io,cloud workers,task,scheduling</tags>
   </metadata>
 </package>
