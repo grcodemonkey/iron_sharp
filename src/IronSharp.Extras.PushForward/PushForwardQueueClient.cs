@@ -12,14 +12,16 @@ namespace IronSharp.Extras.PushForward
     public class PushForwardQueueClient
     {
         private readonly PushForwardClient _client;
+        private readonly PushForwardConfig _config;
         private readonly QueueClient _queueClient;
         private IFailedMessageRetrySender _failedMessageRetrySender;
 
-        public PushForwardQueueClient(PushForwardClient client, QueueClient queueClient, QueueInfo queueInfo)
+        public PushForwardQueueClient(PushForwardClient client, QueueClient queueClient, QueueInfo queueInfo, PushForwardConfig config)
         {
             QueueInfo = queueInfo;
             _client = client;
             _queueClient = queueClient;
+            _config = config;
         }
 
         public IFailedMessageRetrySender FailedMessageRetrySender
@@ -42,10 +44,12 @@ namespace IronSharp.Extras.PushForward
 
         public async Task AddSubscriber(SubscriberItem subscriber)
         {
-            QueueInfo = await _queueClient.AddSubscribers(new SubscriberRequestCollection
+            await _queueClient.AddSubscribers(new SubscriberRequestCollection
             {
                 Subscribers = new List<SubscriberItem> { subscriber }
             });
+
+            await RefreshQueueInfo();
         }
 
         public Uri GetWebhookUri(string token = null)
@@ -90,10 +94,12 @@ namespace IronSharp.Extras.PushForward
 
         public async Task RemoveSubscriber(SubscriberItem subscriber)
         {
-            QueueInfo = await _queueClient.RemoveSubscribers(new SubscriberRequestCollection
+            await _queueClient.RemoveSubscribers(new SubscriberRequestCollection
             {
                 Subscribers = new List<SubscriberItem> { subscriber }
             });
+
+            await RefreshQueueInfo();
         }
 
         public async Task ReplaceSubscribers(EndPointConfig endPoint, string path, NameValueCollection query = null)
@@ -115,8 +121,11 @@ namespace IronSharp.Extras.PushForward
         {
             QueueInfo = await _queueClient.Update(new QueueInfo
             {
+                PushType = _config.GetPushType(),
                 Subscribers = subscribers
             });
+
+            await RefreshQueueInfo();
         }
 
         public async Task<MessageIdCollection> ResendFailedMessages(int? limit = null)
@@ -129,19 +138,30 @@ namespace IronSharp.Extras.PushForward
             return await FailedMessageRetrySender.ResendFailedMessages(cancellationToken, limit);
         }
 
-        public async Task SetErrorQueue(string errorQueueName)
+        public async Task SetErrorQueue(string errorQueueName, Alert alert = null)
+        {
+            QueueInfo = await _queueClient.Update(new QueueInfo
+            {
+                PushType = _config.GetPushType(),
+                ErrorQueue = errorQueueName
+            });
+
+            if (alert != null)
+            {
+                await _client.AddAlertToErrorQueue(errorQueueName, alert);
+            }
+
+            await RefreshQueueInfo();
+        }
+
+        private async Task RefreshQueueInfo()
         {
             QueueInfo = await _queueClient.Info();
 
-            if (string.Equals(QueueInfo.ErrorQueue, errorQueueName))
-            {
-                return;
-            }
-
-            QueueInfo = await _queueClient.Update(new QueueInfo
-            {
-                ErrorQueue = errorQueueName
-            });
+            _config.ErrorQueueName = QueueInfo.ErrorQueue;
+            _config.SetPushType(QueueInfo.PushType);
+            _config.Retries = QueueInfo.Retries;
+            _config.RetryDelay = QueueInfo.RetriesDelay == null ? default(TimeSpan?) : TimeSpan.FromSeconds(QueueInfo.RetriesDelay.Value);
         }
     }
 }

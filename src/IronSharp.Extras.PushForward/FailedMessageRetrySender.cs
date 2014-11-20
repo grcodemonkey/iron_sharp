@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using IronSharp.IronMQ;
 
@@ -42,11 +41,15 @@ namespace IronSharp.Extras.PushForward
                     break;
                 }
 
-                string messageId = await _queueClient.Post(next);
+                var errorQueueMessage = next.ReadValueAs<ErrorQueueMessage>();
+
+                QueueMessage originalMsg = await _queueClient.Get(errorQueueMessage.SourceMessageId);
+
+                string messageId = await _queueClient.Post(originalMsg);
 
                 result.Ids.Add(messageId);
 
-                if (result.Success)
+                if (!string.IsNullOrEmpty(messageId))
                 {
                     await next.Delete();
                 }
