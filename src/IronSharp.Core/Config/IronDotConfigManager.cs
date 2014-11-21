@@ -9,13 +9,34 @@ using Newtonsoft.Json;
 namespace IronSharp.Core
 {
     /// <summary>
-    /// http://dev.iron.io/cache/reference/configuration/
+    ///     http://dev.iron.io/cache/reference/configuration/
     /// </summary>
     public static class IronDotConfigManager
     {
+        private static string _appDirectory;
+
+        public static void DeleteEnvironmentValue(IronProduct product, string key, EnvironmentVariableTarget target = EnvironmentVariableTarget.Process)
+        {
+            SetEnvironmentValue(product, key, null, target);
+        }
+
+        public static string GetApplicationExeFolder()
+        {
+            Assembly entryAssembly = Assembly.GetEntryAssembly();
+
+            string codeBase = entryAssembly.CodeBase;
+
+            var codeBaseUri = new Uri(codeBase);
+
+            return Path.GetDirectoryName(codeBaseUri.LocalPath);
+        }
+
         public static string GetEnvironmentKey(IronProduct product, string key)
         {
-            if (key == null) throw new ArgumentNullException("key");
+            if (key == null)
+            {
+                throw new ArgumentNullException("key");
+            }
 
             string productName = GetProductName(product);
 
@@ -82,16 +103,15 @@ namespace IronSharp.Core
             return settings;
         }
 
+        public static void SetAppDirectory(string path)
+        {
+            _appDirectory = path;
+        }
+
         public static void SetEnvironmentValue(IronProduct product, string key, string value, EnvironmentVariableTarget target = EnvironmentVariableTarget.Process)
         {
             Environment.SetEnvironmentVariable(GetEnvironmentKey(product, key), value, target);
         }
-
-        public static void DeleteEnvironmentValue(IronProduct product, string key, EnvironmentVariableTarget target = EnvironmentVariableTarget.Process)
-        {
-            SetEnvironmentValue(product, key, null, target);
-        }
-
         private static void ApplyOverrides(IronClientConfig targetConfig, IronClientConfig overrideConfig)
         {
             if (overrideConfig == null)
@@ -102,27 +122,18 @@ namespace IronSharp.Core
             targetConfig.ProjectId = string.IsNullOrEmpty(overrideConfig.ProjectId) ? targetConfig.ProjectId : overrideConfig.ProjectId;
             targetConfig.Token = string.IsNullOrEmpty(overrideConfig.Token) ? targetConfig.Token : overrideConfig.Token;
             targetConfig.Host = string.IsNullOrEmpty(overrideConfig.Host) ? targetConfig.Host : overrideConfig.Host;
-            targetConfig.ApiVersion = overrideConfig.ApiVersion.HasValue  ? overrideConfig.ApiVersion : targetConfig.ApiVersion;
+            targetConfig.ApiVersion = overrideConfig.ApiVersion.HasValue ? overrideConfig.ApiVersion : targetConfig.ApiVersion;
         }
-
-        private static string _appDirectory;
-
-        public static void SetAppDirectory(string path)
-        {
-            _appDirectory = path;
-        }
-
         private static string GetAppDirectory()
         {
             if (string.IsNullOrEmpty(_appDirectory))
             {
-                _appDirectory = HostingEnvironment.IsHosted ? 
-                    HostingEnvironment.MapPath("~/") : 
-                    Path.GetDirectoryName(Assembly.GetExecutingAssembly().CodeBase);
+                _appDirectory = HostingEnvironment.IsHosted
+                    ? HostingEnvironment.MapPath("~/")
+                    : GetApplicationExeFolder();
             }
             return _appDirectory;
         }
-
         private static string GetHomeDirectory()
         {
             return Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
@@ -183,10 +194,7 @@ namespace IronSharp.Core
                     {
                         var envType = JsonConvert.DeserializeObject<Dictionary<string, JsonDotConfigModel>>(content, new JsonSerializerSettings
                         {
-                            Error = (sender, args) =>
-                            {
-                                args.ErrorContext.Handled = true;
-                            }
+                            Error = (sender, args) => { args.ErrorContext.Handled = true; }
                         });
                         JsonDotConfigModel envSpecific;
                         if (envType.TryGetValue(env, out envSpecific))

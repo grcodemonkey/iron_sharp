@@ -10,11 +10,11 @@ namespace Demo.IronSharpConsole
         {
             LogManager.Adapter = new ConsoleOutLoggerFactoryAdapter();
 
-            IronCachExample.Run().Wait();
-
             IronMqExample.Run().Wait();
 
             PushForwardExample.Run().Wait();
+
+            IronCachExample.Run().Wait();
 
             IronWorkerExample.Run().Wait();
 

@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Specialized;
 using System.IO;
+using System.Net;
 using System.Net.Http;
-using System.Threading;
 using System.Threading.Tasks;
 using Common.Logging;
 
@@ -55,7 +55,7 @@ namespace IronSharp.Core
                 Content = request.Content
             });
 
-            using (var client = new HttpClient())
+            using (var client = CreateHttpClient())
             {
                 return client.SendAsync(httpRequest);
             }
@@ -111,6 +111,14 @@ namespace IronSharp.Core
             return new RestResponse<T>(await AttemptRequestAync(sharpConfig, request));
         }
 
+        public static HttpClient CreateHttpClient()
+        {
+            return HttpClientFactory.Create(new HttpClientHandler
+            {
+                AutomaticDecompression = DecompressionMethods.Deflate | DecompressionMethods.GZip
+            });
+        }
+
         private async static Task<HttpResponseMessage> AttemptRequestAync(IronSharpConfig sharpConfig, HttpRequestMessage request, int attempt = 0)
         {
             if (attempt > HttpClientOptions.RetryLimit)
@@ -120,7 +128,7 @@ namespace IronSharp.Core
 
             ILog logger = LogManager.GetLogger<RestClient>();
 
-            using (var client = new HttpClient())
+            using (var client = CreateHttpClient())
             {
                 if (logger.IsDebugEnabled)
                 {
