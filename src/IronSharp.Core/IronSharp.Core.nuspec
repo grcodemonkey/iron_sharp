@@ -11,7 +11,7 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
     <releaseNotes>
-      1. Updated dependency on Common.Logging to latest version 2. Fixed bug in finding current directory path for .exe
+      Updating dependency on Common.Logging (again)
     </releaseNotes>
     <tags>iron.io</tags>
   </metadata>

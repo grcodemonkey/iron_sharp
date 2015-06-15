@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Reflection;
 using System.Web.Hosting;
@@ -207,11 +208,12 @@ namespace IronSharp.Core
             }
             catch (IOException ex)
             {
-                LogManager.GetCurrentClassLogger().Error(ex);
+                LogManager.GetLogger("IronSharp Configuration Error").Error(ex);
             }
             return new JsonDotConfigModel();
         }
 
+        [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Local")]
         private class JsonDotConfigModel : IronClientConfig
         {
             [JsonProperty("iron_cache")]
